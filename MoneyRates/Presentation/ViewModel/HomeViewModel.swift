@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 struct AmountViewModel: CustomStringConvertible {
     
@@ -18,29 +19,44 @@ struct AmountViewModel: CustomStringConvertible {
 
 protocol HomeViewModel {
     
-    var symbols: Box<[SymbolModel]> { get }
-    var sourceTitle: Box<String?> { get }
-    var targetTitle: Box<String?> { get }
-    var error: Box<ErrorViewModel?> {get}
-    var targetResult: Box<AmountViewModel?> { get }
-    var busy: Box<Bool> { get }
-    func onLoadView()
+    // Inputs
     func onSource(symbol: SymbolModel)
     func onTarget(symbol: SymbolModel)
     func sourceChanged(input: String)
     func pickSource()
     func pickTarget()
+    
+    func bind(onLoad: AnyPublisher<Void, Never>,
+              onInputSource: AnyPublisher<String, Never>,
+              pickSourceEvent: AnyPublisher<Void, Never>,
+              pickTargetEvent: AnyPublisher<Void, Never>,
+              onSource: AnyPublisher<SymbolModel, Never>,
+              onTarget: AnyPublisher<SymbolModel, Never>
+    )
+    
+    // Output
+    var sourceTitle: Published<String?>.Publisher { get }
+    var targetTitle: Published<String?>.Publisher { get }
+    var error: Published<ErrorViewModel?>.Publisher { get }
+    var targetResult: Published<AmountViewModel?>.Publisher { get }
+    var busy: Published<Bool>.Publisher { get }
+
 }
 
 
-class HomeViewModelImpl: HomeViewModel {
+class HomeViewModelImpl: ObservableObject, HomeViewModel {
     
-    let symbols = Box<[SymbolModel]>([])
-    let error = Box<ErrorViewModel?>(nil)
-    let sourceTitle = Box<String?>(nil)
-    let targetTitle = Box<String?>(nil)
-    var targetResult: Box<AmountViewModel?> = Box(nil)
-    var busy: Box<Bool> = Box(true)
+    var sourceTitle: Published<String?>.Publisher { $_sourceTitle }
+    var targetTitle: Published<String?>.Publisher { $_targetTitle }
+    var error: Published<ErrorViewModel?>.Publisher { $_error }
+    var targetResult: Published<AmountViewModel?>.Publisher { $_targetResult }
+    var busy: Published<Bool>.Publisher { $_busy }
+    
+    @Published private(set) var _sourceTitle: String? = nil
+    @Published private(set) var _targetTitle: String? = nil
+    @Published private(set) var _error: ErrorViewModel? = nil
+    @Published private(set) var _targetResult: AmountViewModel? = nil
+    @Published private(set) var _busy: Bool = false
     
     private var sourceSymbol: String?
     private var targetSymbol: String?
@@ -52,6 +68,8 @@ class HomeViewModelImpl: HomeViewModel {
     let resetDataUC: ResetDataUsecase
     
     var lastConvertItem: DispatchWorkItem? = nil
+
+    private var cancellables: Set<AnyCancellable> = []
     
     init(symbolRepository: SymbolRepository = SymbolRepositoryImpl(), exchangeService: ExchangeRateService = ExchangeRateServiceImpl(),
          conversionUC: ConversionUseCase = ConversionUseCaseImpl(),
@@ -60,29 +78,15 @@ class HomeViewModelImpl: HomeViewModel {
         self.resetDataUC = resetDataUC
     }
     
-    func onLoadView() {
-        print("Loading")
-        self.busy.value = true
-        self.resetDataUC.execute(completion: { result in
-            self.busy.value = false
-            switch result {
-            case .failure(let error):
-                self.error.value = ErrorViewModel(error: error)
-            default:
-                break
-            }
-        })
-    }
-    
     func onSource(symbol: SymbolModel) {
         sourceSymbol = symbol.id
-        sourceTitle.value = symbol.description
+        _sourceTitle = symbol.description
         tryConversion()
     }
     
     func onTarget(symbol: SymbolModel) {
         targetSymbol = symbol.id
-        targetTitle.value = symbol.description
+        _targetTitle = symbol.description
         tryConversion()
     }
     
@@ -113,15 +117,15 @@ class HomeViewModelImpl: HomeViewModel {
         lastConvertItem?.cancel()
         
         let newConvertItem = DispatchWorkItem(block: {
-            self.busy.value = true
+            self._busy = true
             self.conversionUC.execute(sourceSymbol: sourceSymbol, targetSymbol: targetSymbol, amount: amount, completion: { [weak self] result in
                 guard let self = self else { return }
-                self.busy.value = false
+                self._busy = false
                 switch result {
                 case .success(let value):
-                    self.targetResult.value = AmountViewModel(value: value)
+                    self._targetResult = AmountViewModel(value: value)
                 case .failure(let error):
-                    self.error.value = ErrorViewModel(error: error)
+                    self._error = ErrorViewModel(error: error)
                 }
                 
             })
@@ -129,6 +133,59 @@ class HomeViewModelImpl: HomeViewModel {
         lastConvertItem = newConvertItem
         DispatchQueue.global().asyncAfter(deadline: .now() + 0.30, execute: newConvertItem)
         
+    }
+
+    func bind(onLoad: AnyPublisher<Void, Never>,
+              onInputSource: AnyPublisher<String, Never>,
+              pickSourceEvent: AnyPublisher<Void, Never>,
+              pickTargetEvent: AnyPublisher<Void, Never>,
+              onSource: AnyPublisher<SymbolModel, Never>,
+              onTarget: AnyPublisher<SymbolModel, Never>
+    ) {
+        onLoad
+            .sink(receiveValue: { _ in
+                print("Loading")
+                self._busy = true
+                self.resetDataUC.execute(completion: { result in
+                    self._busy = false
+                    switch result {
+                    case .failure(let error):
+                        self._error = ErrorViewModel(error: error)
+                    default:
+                        break
+                    }
+                })
+            }).store(in: &cancellables)
+        
+        onInputSource
+            .sink(receiveValue: { input in
+                self.sourceAmount = (input as NSString).doubleValue
+                self.tryConversion()
+            }).store(in: &cancellables)
+        
+        pickSourceEvent
+            .sink(receiveValue: {
+                self.coordinator?.goToPickSource()
+            }).store(in: &cancellables)
+        
+        pickTargetEvent
+            .sink(receiveValue: {
+                self.coordinator?.goToPickTarget()
+            }).store(in: &cancellables)
+        
+        onSource
+            .sink(receiveValue: { symbol in
+                self.sourceSymbol = symbol.id
+                self._sourceTitle = symbol.description
+                self.tryConversion()
+            }).store(in: &cancellables)
+        
+        onTarget
+            .sink(receiveValue: { symbol in
+                self.targetSymbol = symbol.id
+                self._targetTitle = symbol.description
+                self.tryConversion()
+            }).store(in: &cancellables)
     }
 }
 

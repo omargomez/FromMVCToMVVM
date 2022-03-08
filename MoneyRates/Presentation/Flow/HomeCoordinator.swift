@@ -52,13 +52,7 @@ extension HomeCoordinatorImpl: PickCurrencyViewModelDelegate {
         print("onSymbolSelected \(symbol.description)")
         parentController.presentedViewController?.dismiss(animated: true, completion: { [weak self] in
             // Tell the model
-            if viewModel.mode == .source {
-                self?.parentController.viewModel.onSource(symbol: symbol)
-            } else {
-                self?.parentController.viewModel.onTarget(symbol: symbol)
-            }
+            self?.parentController.onSymbolSelected(viewModel: viewModel, symbol: symbol)
         })
     }
-    
-    
 }

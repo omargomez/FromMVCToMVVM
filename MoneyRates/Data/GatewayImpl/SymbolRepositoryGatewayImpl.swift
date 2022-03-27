@@ -44,4 +44,13 @@ final class SymbolRepositoryGatewayImpl: SymbolRepositoryGateway {
         return SymbolModel(id: code, description: description)
     }
     
+    func filter(text: String) -> [SymbolModel]? {
+        repository.filter(byDescription: text)?.compactMap({ entity in
+            guard let code = entity.code,
+                  let description = entity.symbolDescription else {
+                      return nil
+                  }
+            return SymbolModel(id: code, description: description)
+        })
+    }
 }

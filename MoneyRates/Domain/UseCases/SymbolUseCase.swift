@@ -7,11 +7,24 @@
 
 import Foundation
 
+enum SymbolUseCaseError: LocalizedError {
+    case emptyStore
+    
+    var errorDescription: String? {
+        switch self {
+        case .emptyStore:
+            return "emptyStore"
+        }
+    }
+    
+}
+
 protocol SymbolUseCase {
     
     typealias CompletionType = (Result<[SymbolModel], Error>) -> ()
     
     func getSymbols(completion: @escaping CompletionType)
+    func filterSymbols(text: String?) -> [SymbolModel]?
 }
 
 class SymbolUseCaseImpl: SymbolUseCase {
@@ -55,5 +68,18 @@ class SymbolUseCaseImpl: SymbolUseCase {
         print("count OK \(count)")
         completion(.success(self.symbolRepository.getAll() ?? []))
         
+    }
+    
+    func filterSymbols(text: String?) -> [SymbolModel]? {
+        guard let text = text else {
+            return symbolRepository.getAll()
+        }
+        
+        guard let count = try? symbolRepository.count(),
+              count > 0 else {
+                  return nil
+              }
+        
+        return symbolRepository.filter(text: text)
     }
 }

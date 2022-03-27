@@ -32,6 +32,7 @@ protocol SymbolRepository {
     func getAll() -> [SymbolEntity]?
     func getSymbol(code: String) -> SymbolEntity?
     func count() throws -> Int
+    func filter(byDescription text: String) -> [SymbolEntity]?
 }
 
 class SymbolRepositoryImpl: SymbolRepository {
@@ -93,5 +94,15 @@ class SymbolRepositoryImpl: SymbolRepository {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "SymbolEntity")
         return try container.viewContext.count(for: fetchRequest)
 
+    }
+    
+    func filter(byDescription text: String) -> [SymbolEntity]? {
+        do {
+            let fetchReq = NSFetchRequest<SymbolEntity>(entityName: "SymbolEntity")
+            fetchReq.predicate = NSPredicate(format: "symbolDescription CONTAINS %@", text)
+            return try container.viewContext.fetch(fetchReq)
+        } catch {
+            return nil
+        }
     }
 }

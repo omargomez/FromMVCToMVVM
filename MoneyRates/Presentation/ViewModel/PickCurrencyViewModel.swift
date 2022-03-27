@@ -35,11 +35,14 @@ protocol PickCurrencyViewModel {
     var loaded: Box<Bool> { get }
     var error: Box<Error?> { get }
     var symbols: Box<[SymbolModel]> { get }
+    var searchEnabled: Box<Bool> { get }
     var delegate: PickCurrencyViewModelDelegate? { get set }
     
     func onLoad()
     func currencyCount() -> Int
     func onSelection(row: Int)
+    func onSearch(text: String)
+    func onCancelSearch()
 }
 
 final class PickCurrencyViewModelImpl: PickCurrencyViewModel {
@@ -47,6 +50,7 @@ final class PickCurrencyViewModelImpl: PickCurrencyViewModel {
     var loaded: Box<Bool> = Box(false)
     var error: Box<Error?> = Box(nil)
     var symbols: Box<[SymbolModel]> = Box([])
+    var searchEnabled: Box<Bool> = Box(false)
     var mode: PickCurrencyModeEnum = .source
     weak var delegate: PickCurrencyViewModelDelegate?
     
@@ -62,14 +66,31 @@ final class PickCurrencyViewModelImpl: PickCurrencyViewModel {
                 return
             }
 
-            switch result {
-            case .success(let symbols):
-                print("symbols.bind OK: \(symbols.count)")
-                self.symbols.value = symbols
-            case .failure(let error):
-                self.error.value = error
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else {
+                    return
+                }
+                
+                // This is to avoid thrading issues
+                switch result {
+                case .success(let symbols):
+                    self.symbols.value = symbols.sorted(by: { $0.description < $1.description})
+                case .failure(let error):
+                    self.error.value = error
+                }
             }
         })
+    }
+    
+    func onSearch(text: String) {
+        // Filter current symbols
+        guard let result = userCase.filterSymbols(text: text) else {
+            // TODO: Error
+            return
+        }
+        
+        print("on search: \(result.count)")
+        self.symbols.value = result.sorted(by: { $0.description < $1.description})
     }
 
     func currencyCount() -> Int {
@@ -80,5 +101,15 @@ final class PickCurrencyViewModelImpl: PickCurrencyViewModel {
     func onSelection(row: Int) {
         let symbol = self.symbols.value[row]
         delegate?.onSymbolSelected(viewModel: self, symbol: symbol)
+    }
+    
+    func onCancelSearch() {
+        guard let result = userCase.filterSymbols(text: nil) else {
+            // TODO: Error
+            return
+        }
+        
+        self.symbols.value = result.sorted(by: { $0.description < $1.description})
+        self.searchEnabled.value = false
     }
 }

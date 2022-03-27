@@ -13,5 +13,6 @@ protocol SymbolRepositoryGateway {
     func getAll() -> [SymbolModel]?
     func getSymbol(code: String) -> SymbolModel?
     func count() throws -> Int
+    func filter(text: String) -> [SymbolModel]?
 
 }

@@ -43,17 +43,33 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0lL-2i-cF3">
-                                <rect key="frame" x="41.5" y="333.5" width="331" height="31"/>
+                                <rect key="frame" x="41.5" y="300.5" width="331" height="64"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="gray" title="Pick Source Currency"/>
+                                <buttonConfiguration key="configuration" style="gray">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Pick Source Currency">
+                                            <attributes>
+                                                <font key="NSFont" size="18" name="Helvetica"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
+                                </buttonConfiguration>
                                 <connections>
                                     <action selector="onSourcePickAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="x8q-8s-cnY"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f6p-24-Jlg">
-                                <rect key="frame" x="41.5" y="533" width="331" height="31"/>
+                                <rect key="frame" x="41.5" y="533" width="331" height="64"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="gray" title="Pick Target Currency"/>
+                                <buttonConfiguration key="configuration" style="gray">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Pick Target Currency">
+                                            <attributes>
+                                                <font key="NSFont" size="18" name="Helvetica"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
+                                </buttonConfiguration>
                                 <connections>
                                     <action selector="onTargetPickAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="8bV-id-TBn"/>
                                 </connections>
@@ -80,7 +96,9 @@
                             <constraint firstItem="7rr-VV-Fu2" firstAttribute="trailing" secondItem="0lL-2i-cF3" secondAttribute="trailing" id="eKm-yA-ost"/>
                             <constraint firstItem="0lL-2i-cF3" firstAttribute="width" secondItem="sVp-pr-ykt" secondAttribute="width" id="gS7-QZ-4u4"/>
                             <constraint firstItem="xeL-hA-5MB" firstAttribute="top" secondItem="wec-MM-fQk" secondAttribute="bottom" constant="7.5" id="r5u-Uw-1sf"/>
+                            <constraint firstItem="0lL-2i-cF3" firstAttribute="height" secondItem="sVp-pr-ykt" secondAttribute="height" id="slW-Wd-291"/>
                             <constraint firstItem="wec-MM-fQk" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="tIX-mZ-DBg"/>
+                            <constraint firstItem="f6p-24-Jlg" firstAttribute="height" secondItem="xeL-hA-5MB" secondAttribute="height" id="upO-F5-pJn"/>
                             <constraint firstItem="sVp-pr-ykt" firstAttribute="top" secondItem="0lL-2i-cF3" secondAttribute="bottom" constant="8" id="v5W-gM-WoF"/>
                         </constraints>
                     </view>
@@ -97,63 +115,46 @@
             </objects>
             <point key="canvasLocation" x="19" y="98"/>
         </scene>
-        <!--Pick Currency Controller-->
-        <scene sceneID="14z-49-VZC">
-            <objects>
-                <tableViewController id="FWD-SQ-sCw" customClass="PickCurrencyController" customModule="MoneyRates" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="9AM-vL-xOe">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="XN5-i9-oie">
-                                <rect key="frame" x="0.0" y="44.5" width="414" height="43.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="XN5-i9-oie" id="5qO-0F-YqS">
-                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="FWD-SQ-sCw" id="Nof-80-sTx"/>
-                            <outlet property="delegate" destination="FWD-SQ-sCw" id="VPt-d8-ieL"/>
-                        </connections>
-                    </tableView>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="L7D-ig-Dci" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="19" y="780"/>
-        </scene>
-        <!--Pick Currency View Controller-->
+        <!--ass-->
         <scene sceneID="jUb-e0-AWA">
             <objects>
-                <viewController storyboardIdentifier="currencyViewController" id="CsU-h8-JS8" customClass="PickCurrencyViewController" customModule="MoneyRates" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="currencyViewController" title="ass" id="CsU-h8-JS8" customClass="PickCurrencyViewController" customModule="MoneyRates" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Idj-Q1-d0j">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="1z8-R3-XEl">
-                                <rect key="frame" x="0.0" y="44" width="414" height="818"/>
+                                <rect key="frame" x="0.0" y="95" width="414" height="767"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </tableView>
+                            <searchBar contentMode="redraw" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="p7W-WM-NRB">
+                                <rect key="frame" x="0.0" y="44" width="414" height="51"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <outlet property="delegate" destination="CsU-h8-JS8" id="48U-Et-61S"/>
+                                </connections>
+                            </searchBar>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="qWQ-f7-A8P"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="1z8-R3-XEl" firstAttribute="top" secondItem="p7W-WM-NRB" secondAttribute="bottom" id="0Wn-8b-mFA"/>
                             <constraint firstItem="qWQ-f7-A8P" firstAttribute="bottom" secondItem="1z8-R3-XEl" secondAttribute="bottom" id="1mJ-bp-Fwt"/>
-                            <constraint firstItem="1z8-R3-XEl" firstAttribute="top" secondItem="qWQ-f7-A8P" secondAttribute="top" id="Onc-r8-JfC"/>
+                            <constraint firstItem="p7W-WM-NRB" firstAttribute="top" secondItem="qWQ-f7-A8P" secondAttribute="top" id="7DN-JY-79i"/>
+                            <constraint firstItem="p7W-WM-NRB" firstAttribute="leading" secondItem="qWQ-f7-A8P" secondAttribute="leading" id="ADQ-aJ-ndc"/>
                             <constraint firstItem="1z8-R3-XEl" firstAttribute="leading" secondItem="qWQ-f7-A8P" secondAttribute="leading" id="PgA-H0-X4Z"/>
+                            <constraint firstItem="p7W-WM-NRB" firstAttribute="trailing" secondItem="qWQ-f7-A8P" secondAttribute="trailing" id="Pxs-ck-8oy"/>
                             <constraint firstItem="qWQ-f7-A8P" firstAttribute="trailing" secondItem="1z8-R3-XEl" secondAttribute="trailing" id="ff4-ka-gV2"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="searchBar" destination="p7W-WM-NRB" id="CcT-jJ-NUZ"/>
                         <outlet property="tableView" destination="1z8-R3-XEl" id="hDk-W9-1bR"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="heq-UQ-z2N" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="870" y="779"/>
+            <point key="canvasLocation" x="830.43478260869574" y="97.767857142857139"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="t2X-cB-AEZ">

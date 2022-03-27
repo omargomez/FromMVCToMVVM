@@ -10,6 +10,7 @@ import UIKit
 class PickCurrencyViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var searchBar: UISearchBar!
     
     var viewModel: PickCurrencyViewModel!
 
@@ -25,6 +26,13 @@ class PickCurrencyViewController: UIViewController {
             print("Reload data!! \(symbols.count)")
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
+            }
+        })
+        
+        viewModel.searchEnabled.bind(listener: { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.searchBar.text = nil
+                self?.searchBar.resignFirstResponder()
             }
         })
         
@@ -63,4 +71,16 @@ extension PickCurrencyViewController: UITableViewDelegate {
         print("didSelectRowAt : \(indexPath.row)")
         self.viewModel.onSelection(row: indexPath.row)
     }
+}
+
+extension PickCurrencyViewController: UISearchBarDelegate {
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        self.viewModel.onCancelSearch()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        self.viewModel.onSearch(text: searchText)
+    }
+    
 }

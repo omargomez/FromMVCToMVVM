@@ -79,6 +79,15 @@ class HomeViewController: UIViewController {
             }
         })
         
+        viewModel.sourceResult.bind(listener: { [weak self] value in
+            guard let self = self, let value = value else {
+                return
+            }
+            DispatchQueue.main.async {
+                self.sourceField.text = String(describing: value)
+            }
+        })
+        
         viewModel.busy.bind(listener: { [weak self] value in
             guard let self = self else {
                 return
@@ -111,6 +120,14 @@ class HomeViewController: UIViewController {
         }
         
         viewModel.sourceChanged(input: text)
+    }
+    
+    @IBAction func onTargetChanged(_ sender: UITextField) {
+        guard let text = sender.text else {
+            return
+        }
+        
+        viewModel.targetChanged(input: text)
     }
     
 }

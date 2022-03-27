@@ -12,7 +12,7 @@ struct AmountViewModel: CustomStringConvertible {
     let value: Double
     
     var description: String {
-        "\(value)"
+        String(format: "%.2f", value)
     }
 }
 
@@ -23,11 +23,13 @@ protocol HomeViewModel {
     var targetTitle: Box<String?> { get }
     var error: Box<ErrorViewModel?> {get}
     var targetResult: Box<AmountViewModel?> { get }
+    var sourceResult: Box<AmountViewModel?> { get }
     var busy: Box<Bool> { get }
     func onLoadView()
     func onSource(symbol: SymbolModel)
     func onTarget(symbol: SymbolModel)
     func sourceChanged(input: String)
+    func targetChanged(input: String)
     func pickSource()
     func pickTarget()
 }
@@ -40,6 +42,7 @@ class HomeViewModelImpl: HomeViewModel {
     let sourceTitle = Box<String?>(nil)
     let targetTitle = Box<String?>(nil)
     var targetResult: Box<AmountViewModel?> = Box(nil)
+    var sourceResult: Box<AmountViewModel?> = Box(nil)
     var busy: Box<Bool> = Box(true)
     
     private var sourceSymbol: String?
@@ -92,6 +95,12 @@ class HomeViewModelImpl: HomeViewModel {
         tryConversion()
     }
     
+    func targetChanged(input: String) {
+        sourceAmount = (input as NSString).doubleValue
+        
+        tryConversion(inverted: true)
+    }
+    
     func pickSource() {
         coordinator?.goToPickSource()
     }
@@ -100,10 +109,10 @@ class HomeViewModelImpl: HomeViewModel {
         coordinator?.goToPickTarget()
     }
     
-    private func tryConversion() {
+    private func tryConversion(inverted: Bool = false) {
         guard let amount = sourceAmount,
-                let sourceSymbol = sourceSymbol,
-              let targetSymbol = targetSymbol else {
+              let actualSourceSymbol = (inverted ? targetSymbol : sourceSymbol),
+              let actualTargetSymbol = (inverted ? sourceSymbol : targetSymbol) else {
                   
                   print("tryConversion, FAIL")
                   
@@ -114,12 +123,16 @@ class HomeViewModelImpl: HomeViewModel {
         
         let newConvertItem = DispatchWorkItem(block: {
             self.busy.value = true
-            self.conversionUC.execute(sourceSymbol: sourceSymbol, targetSymbol: targetSymbol, amount: amount, completion: { [weak self] result in
+            self.conversionUC.execute(sourceSymbol: actualSourceSymbol, targetSymbol: actualTargetSymbol, amount: amount, completion: { [weak self] result in
                 guard let self = self else { return }
                 self.busy.value = false
                 switch result {
                 case .success(let value):
-                    self.targetResult.value = AmountViewModel(value: value)
+                    if inverted {
+                        self.sourceResult.value = AmountViewModel(value: value)
+                    } else {
+                        self.targetResult.value = AmountViewModel(value: value)
+                    }
                 case .failure(let error):
                     self.error.value = ErrorViewModel(error: error)
                 }

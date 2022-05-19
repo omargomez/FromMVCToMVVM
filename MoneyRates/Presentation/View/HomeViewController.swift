@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 extension UIViewController {
     
@@ -34,6 +35,14 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var targetField: UITextField!
     @IBOutlet weak var busyIndicator: UIActivityIndicatorView!
     
+    private var cancellables: Set<AnyCancellable> = []
+    private let loadSubject = PassthroughSubject<Void, Never>()
+    private let inputSourceSubject = PassthroughSubject<String, Never>()
+    private let pickSourceSubject = PassthroughSubject<Void, Never>()
+    private let pickTargetSubject = PassthroughSubject<Void, Never>()
+    private let onSourceSubject = PassthroughSubject<SymbolModel, Never>()
+    private let onTargetSubject = PassthroughSubject<SymbolModel, Never>()
+    
     convenience init?(coder: NSCoder, viewModel: HomeViewModel) {
         self.init(coder: coder)
         self.viewModel = viewModel
@@ -42,76 +51,56 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        viewModel.error.bind(listener: { [weak self] error in
-            guard let self = self, let error = error else {
-                return
-            }
-
-            DispatchQueue.main.async {
-                self.showErrorAlert(title: error.title, message: error.description)
-            }
-        })
-
-        viewModel.sourceTitle.bind(listener: { [weak self] title in
-            guard let self = self, let title = title else {
-                return
-            }
-            DispatchQueue.main.async {
+        viewModel.sourceTitle
+            .receive(on: RunLoop.main)
+            .sink { (title) in
                 self.sourceButton.setTitle(title, for: .normal)
-            }
-        })
-
-        viewModel.targetTitle.bind(listener: { [weak self] title in
-            guard let self = self, let title = title else {
-                return
-            }
-            DispatchQueue.main.async {
+        }.store(in: &cancellables)
+        
+        viewModel.targetTitle
+            .receive(on: RunLoop.main)
+            .sink { (title) in
                 self.targetButton.setTitle(title, for: .normal)
-            }
-        })
+        }.store(in: &cancellables)
         
-        viewModel.targetResult.bind(listener: { [weak self] value in
-            guard let self = self, let value = value else {
-                return
-            }
-            DispatchQueue.main.async {
+        viewModel.error
+            .compactMap{ $0 }
+            .receive(on: RunLoop.main)
+            .sink { (error) in
+                self.showErrorAlert(title: error.title, message: error.description)
+        }.store(in: &cancellables)
+        
+        viewModel.targetResult
+            .compactMap{ $0 }
+            .receive(on: RunLoop.main)
+            .sink { (value) in
                 self.targetField.text = String(describing: value)
-            }
-        })
+        }.store(in: &cancellables)
         
-        viewModel.sourceResult.bind(listener: { [weak self] value in
-            guard let self = self, let value = value else {
-                return
-            }
-            DispatchQueue.main.async {
-                self.sourceField.text = String(describing: value)
-            }
-        })
-        
-        viewModel.busy.bind(listener: { [weak self] value in
-            guard let self = self else {
-                return
-            }
-            
-            DispatchQueue.main.async {
+        viewModel.busy
+            .compactMap{ $0 }
+            .receive(on: RunLoop.main)
+            .sink { (value) in
                 self.busyIndicator.isHidden = !value
                 if value {
                     self.busyIndicator.startAnimating()
                 } else {
                     self.busyIndicator.stopAnimating()
                 }
-            }
-        })
-                                   
-        viewModel.onLoadView()
+            }.store(in: &cancellables)
+        
+        viewModel.bind(onLoad: loadSubject.eraseToAnyPublisher(), onInputSource: inputSourceSubject.eraseToAnyPublisher(), pickSourceEvent: pickSourceSubject.eraseToAnyPublisher(), pickTargetEvent: pickTargetSubject.eraseToAnyPublisher(), onSource: onSourceSubject.eraseToAnyPublisher(), onTarget: onTargetSubject.eraseToAnyPublisher())
+        
+        loadSubject.send(())
+        
     }
 
     @IBAction func onSourcePickAction(_ sender: Any) {
-        viewModel.pickSource()
+        pickSourceSubject.send(())
     }
     
     @IBAction func onTargetPickAction(_ sender: Any) {
-        viewModel.pickTarget()
+        pickTargetSubject.send(())
     }
     
     @IBAction func onSourceChanged(_ sender: UITextField) {
@@ -119,7 +108,7 @@ class HomeViewController: UIViewController {
             return
         }
         
-        viewModel.sourceChanged(input: text)
+        inputSourceSubject.send(text)
     }
     
     @IBAction func onTargetChanged(_ sender: UITextField) {
@@ -130,4 +119,14 @@ class HomeViewController: UIViewController {
         viewModel.targetChanged(input: text)
     }
     
+}
+
+extension HomeViewController: PickCurrencyViewModelDelegate {
+    func onSymbolSelected(viewModel: PickCurrencyViewModel, symbol: SymbolModel) {
+        if viewModel.mode == .source {
+            onSourceSubject.send(symbol)
+        } else {
+            onTargetSubject.send(symbol)
+        }
+    }
 }

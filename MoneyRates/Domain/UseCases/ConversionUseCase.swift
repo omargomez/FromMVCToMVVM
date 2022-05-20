@@ -12,8 +12,6 @@ protocol ConversionUseCase {
     
     typealias CompletionType = (Result<Double, Error>) -> ()
     
-    func execute(sourceSymbol: String, targetSymbol: String, amount: Double, completion: @escaping CompletionType )
-    
     func execute(sourceSymbol: String, targetSymbol: String, amount: Double) -> AnyPublisher <Double, Error>
 }
 
@@ -25,19 +23,6 @@ final class ConversionUseCaseImpl: ConversionUseCase {
         self.exchangeService = exchangeService
     }
     
-    func execute(sourceSymbol: String, targetSymbol: String, amount: Double, completion: @escaping CompletionType) {
-        
-        guard amount >= 0.01 else {
-            completion(.success(0.0))
-            return
-        }
-        
-        self.exchangeService.convert(sourceSymbol: sourceSymbol, targetSymbol: targetSymbol, amount: amount, completion: { result in
-            completion(result)
-        })
-    }
-    
-
     func execute(sourceSymbol: String, targetSymbol: String, amount: Double) -> AnyPublisher <Double, Error> {
         
         let result: Future<Double, Error> = Future() { promise in

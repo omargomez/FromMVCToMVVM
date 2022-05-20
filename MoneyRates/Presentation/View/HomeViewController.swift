@@ -51,49 +51,19 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        viewModel.sourceTitle
-            .receive(on: RunLoop.main)
-            .sink { (title) in
-                self.sourceButton.setTitle(title, for: .normal)
-        }.store(in: &cancellables)
-        
-        viewModel.targetTitle
-            .receive(on: RunLoop.main)
-            .sink { (title) in
-                self.targetButton.setTitle(title, for: .normal)
-        }.store(in: &cancellables)
-        
-        viewModel.error
-            .compactMap{ $0 }
-            .receive(on: RunLoop.main)
-            .sink { (error) in
-                self.showErrorAlert(title: error.title, message: error.description)
-        }.store(in: &cancellables)
-        
-        viewModel.targetResult
-            .compactMap{ $0 }
-            .receive(on: RunLoop.main)
-            .sink { (value) in
-                self.targetField.text = String(describing: value)
-        }.store(in: &cancellables)
-        
-        viewModel.busy
-            .compactMap{ $0 }
-            .receive(on: RunLoop.main)
-            .sink { (value) in
-                self.busyIndicator.isHidden = !value
-                if value {
-                    self.busyIndicator.startAnimating()
-                } else {
-                    self.busyIndicator.stopAnimating()
-                }
-            }.store(in: &cancellables)
+        bind(sourceTitle: viewModel.sourceTitle.eraseToAnyPublisher(),
+             targetTitle: viewModel.targetTitle.eraseToAnyPublisher(),
+             error: viewModel.error.eraseToAnyPublisher(),
+             targetResult: viewModel.targetResult.eraseToAnyPublisher(),
+             busy: viewModel.busy.eraseToAnyPublisher()
+        )
         
         viewModel.bind(onLoad: loadSubject.eraseToAnyPublisher(), onInputSource: inputSourceSubject.eraseToAnyPublisher(), pickSourceEvent: pickSourceSubject.eraseToAnyPublisher(), pickTargetEvent: pickTargetSubject.eraseToAnyPublisher(), onSource: onSourceSubject.eraseToAnyPublisher(), onTarget: onTargetSubject.eraseToAnyPublisher())
         
         loadSubject.send(())
         
     }
+    
 
     @IBAction func onSourcePickAction(_ sender: Any) {
         pickSourceSubject.send(())
@@ -112,13 +82,61 @@ class HomeViewController: UIViewController {
     }
     
     @IBAction func onTargetChanged(_ sender: UITextField) {
-        guard let text = sender.text else {
-            return
-        }
-        
-        viewModel.targetChanged(input: text)
+//        guard let text = sender.text else {
+//            return
+//        }
+//
+//        viewModel.targetChanged(input: text)
+        print("onTargetChanged")
     }
-    
+}
+
+extension HomeViewController {
+    private func bind(sourceTitle: AnyPublisher<String?, Never>,
+        targetTitle: AnyPublisher<String?, Never>,
+        error: AnyPublisher<ErrorViewModel?, Never>,
+        targetResult: AnyPublisher<AmountViewModel?, Never>,
+        busy: AnyPublisher<Bool, Never>
+    ) {
+        
+        sourceTitle
+            .receive(on: RunLoop.main)
+            .sink { (title) in
+                self.sourceButton.setTitle(title, for: .normal)
+            }.store(in: &cancellables)
+        
+        targetTitle
+            .receive(on: RunLoop.main)
+            .sink { (title) in
+                self.targetButton.setTitle(title, for: .normal)
+        }.store(in: &cancellables)
+        
+        error
+            .compactMap{ $0 }
+            .receive(on: RunLoop.main)
+            .sink { (error) in
+                self.showErrorAlert(title: error.title, message: error.description)
+        }.store(in: &cancellables)
+        
+        targetResult
+            .compactMap{ $0 }
+            .receive(on: RunLoop.main)
+            .sink { (value) in
+                self.targetField.text = String(describing: value)
+        }.store(in: &cancellables)
+        
+        busy
+            .compactMap{ $0 }
+            .receive(on: RunLoop.main)
+            .sink { (value) in
+                self.busyIndicator.isHidden = !value
+                if value {
+                    self.busyIndicator.startAnimating()
+                } else {
+                    self.busyIndicator.stopAnimating()
+                }
+            }.store(in: &cancellables)
+    }
 }
 
 extension HomeViewController: PickCurrencyViewModelDelegate {

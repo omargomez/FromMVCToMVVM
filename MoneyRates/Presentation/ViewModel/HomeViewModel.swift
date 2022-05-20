@@ -23,6 +23,7 @@ protocol HomeViewModel {
     // Inputs
     func bind(onLoad: AnyPublisher<Void, Never>,
               onInputSource: AnyPublisher<String, Never>,
+              onInputTarget: AnyPublisher<String, Never>,
               pickSourceEvent: AnyPublisher<Void, Never>,
               pickTargetEvent: AnyPublisher<Void, Never>,
               onSource: AnyPublisher<SymbolModel, Never>,
@@ -33,6 +34,7 @@ protocol HomeViewModel {
     var sourceTitle: Published<String?>.Publisher { get }
     var targetTitle: Published<String?>.Publisher { get }
     var error: Published<ErrorViewModel?>.Publisher { get }
+    var sourceResult: Published<AmountViewModel?>.Publisher { get }
     var targetResult: Published<AmountViewModel?>.Publisher { get }
     var busy: Published<Bool>.Publisher { get }
     
@@ -50,12 +52,14 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
     var sourceTitle: Published<String?>.Publisher { $_sourceTitle }
     var targetTitle: Published<String?>.Publisher { $_targetTitle }
     var error: Published<ErrorViewModel?>.Publisher { $_error }
+    var sourceResult: Published<AmountViewModel?>.Publisher { $_sourceResult }
     var targetResult: Published<AmountViewModel?>.Publisher { $_targetResult }
     var busy: Published<Bool>.Publisher { $_busy }
     
     @Published private(set) var _sourceTitle: String? = nil
     @Published private(set) var _targetTitle: String? = nil
     @Published private(set) var _error: ErrorViewModel? = nil
+    @Published private(set) var _sourceResult: AmountViewModel? = nil
     @Published private(set) var _targetResult: AmountViewModel? = nil
     @Published private(set) var _busy: Bool = false
     
@@ -71,6 +75,7 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
     var lastConvertItem: DispatchWorkItem? = nil
     
     private var cancellables: Set<AnyCancellable> = []
+    typealias ConversionType = Result<Double, Error>
     
     init(symbolRepository: SymbolRepository = SymbolRepositoryImpl(), exchangeService: ExchangeRateService = ExchangeRateServiceImpl(),
          conversionUC: ConversionUseCase = ConversionUseCaseImpl(),
@@ -81,6 +86,7 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
     
     func bind(onLoad: AnyPublisher<Void, Never>,
               onInputSource: AnyPublisher<String, Never>,
+              onInputTarget: AnyPublisher<String, Never>,
               pickSourceEvent: AnyPublisher<Void, Never>,
               pickTargetEvent: AnyPublisher<Void, Never>,
               onSource: AnyPublisher<SymbolModel, Never>,
@@ -126,8 +132,40 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
             })
             .store(in: &cancellables)
         
-        typealias ConversionType = Result<Double, Error>
-        onInputSource
+            setup(input: onInputSource,
+                sourceSymbol: onSource,
+                targetSymbol: onTarget)
+            .sink(receiveValue: { result in
+                switch result {
+                case .success(let amount):
+                    self._targetResult = AmountViewModel(value: amount)
+                case .failure(let error):
+                    self._error = ErrorViewModel(error: error)
+                }
+            })
+        
+            .store(in: &cancellables)
+            setup(input: onInputTarget,
+                sourceSymbol: onTarget,
+                targetSymbol: onSource)
+            .sink(receiveValue: { result in
+                switch result {
+                case .success(let amount):
+                    self._sourceResult = AmountViewModel(value: amount)
+                case .failure(let error):
+                    self._error = ErrorViewModel(error: error)
+                }
+            })
+            .store(in: &cancellables)
+    }
+}
+
+private extension HomeViewModelImpl {
+    func setup(input: AnyPublisher<String, Never>,
+               sourceSymbol: AnyPublisher<SymbolModel, Never>,
+               targetSymbol: AnyPublisher<SymbolModel, Never>
+    ) -> AnyPublisher<ConversionType, Never> {
+        input
             .compactMap({ text -> Double? in
                 guard let val = Double(text),
                       val >= 0.01 else {
@@ -135,7 +173,7 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
                       }
                 return val
             })
-            .combineLatest(onSource, onTarget)
+            .combineLatest(sourceSymbol, targetSymbol)
             .handleEvents(receiveOutput: { _ in
                 self._busy = true
             })
@@ -152,15 +190,6 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
             .handleEvents(receiveOutput: { _ in
                 self._busy = false
             })
-            .sink(receiveValue: { value in
-                switch value {
-                case .success(let amount):
-                    self._targetResult = AmountViewModel(value: amount)
-                case .failure(let error):
-                    self._error = ErrorViewModel(error: error)
-                }
-            })
-            .store(in: &cancellables)
-                    
+            .eraseToAnyPublisher()
     }
 }

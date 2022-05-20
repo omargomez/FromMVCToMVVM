@@ -38,6 +38,7 @@ class HomeViewController: UIViewController {
     private var cancellables: Set<AnyCancellable> = []
     private let loadSubject = PassthroughSubject<Void, Never>()
     private let inputSourceSubject = PassthroughSubject<String, Never>()
+    private let inputTargetSubject = PassthroughSubject<String, Never>()
     private let pickSourceSubject = PassthroughSubject<Void, Never>()
     private let pickTargetSubject = PassthroughSubject<Void, Never>()
     private let onSourceSubject = PassthroughSubject<SymbolModel, Never>()
@@ -55,10 +56,17 @@ class HomeViewController: UIViewController {
              targetTitle: viewModel.targetTitle.eraseToAnyPublisher(),
              error: viewModel.error.eraseToAnyPublisher(),
              targetResult: viewModel.targetResult.eraseToAnyPublisher(),
+             sourceResult: viewModel.sourceResult.eraseToAnyPublisher(),
              busy: viewModel.busy.eraseToAnyPublisher()
         )
         
-        viewModel.bind(onLoad: loadSubject.eraseToAnyPublisher(), onInputSource: inputSourceSubject.eraseToAnyPublisher(), pickSourceEvent: pickSourceSubject.eraseToAnyPublisher(), pickTargetEvent: pickTargetSubject.eraseToAnyPublisher(), onSource: onSourceSubject.eraseToAnyPublisher(), onTarget: onTargetSubject.eraseToAnyPublisher())
+        viewModel.bind(onLoad: loadSubject.eraseToAnyPublisher(),
+                       onInputSource: inputSourceSubject.eraseToAnyPublisher(),
+                       onInputTarget: inputTargetSubject.eraseToAnyPublisher(),
+                       pickSourceEvent: pickSourceSubject.eraseToAnyPublisher(),
+                       pickTargetEvent: pickTargetSubject.eraseToAnyPublisher(),
+                       onSource: onSourceSubject.eraseToAnyPublisher(),
+                       onTarget: onTargetSubject.eraseToAnyPublisher())
         
         loadSubject.send(())
         
@@ -82,12 +90,11 @@ class HomeViewController: UIViewController {
     }
     
     @IBAction func onTargetChanged(_ sender: UITextField) {
-//        guard let text = sender.text else {
-//            return
-//        }
-//
-//        viewModel.targetChanged(input: text)
-        print("onTargetChanged")
+        guard let text = sender.text else {
+            return
+        }
+        
+        inputTargetSubject.send(text)
     }
 }
 
@@ -96,6 +103,7 @@ extension HomeViewController {
         targetTitle: AnyPublisher<String?, Never>,
         error: AnyPublisher<ErrorViewModel?, Never>,
         targetResult: AnyPublisher<AmountViewModel?, Never>,
+        sourceResult: AnyPublisher<AmountViewModel?, Never>,
         busy: AnyPublisher<Bool, Never>
     ) {
         
@@ -124,6 +132,14 @@ extension HomeViewController {
             .sink { (value) in
                 self.targetField.text = String(describing: value)
         }.store(in: &cancellables)
+        
+        sourceResult
+            .compactMap{ $0 }
+            .receive(on: RunLoop.main)
+            .sink { (value) in
+                self.sourceField.text = String(describing: value)
+        }.store(in: &cancellables)
+        
         
         busy
             .compactMap{ $0 }

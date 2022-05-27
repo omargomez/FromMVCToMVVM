@@ -6,11 +6,19 @@
 //
 
 import UIKit
+import Combine
 
 class PickCurrencyViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchBar: UISearchBar!
+    
+    private let loadSubject = PassthroughSubject<Void, Never>()
+    private let onSelectionSubject = PassthroughSubject<Int, Never>()
+    private let cancelSubject = PassthroughSubject<Void, Never>()
+    private var searchSubject = PassthroughSubject<String, Never>()
+    private var cancellables: Set<AnyCancellable> = []
+    
     
     var viewModel: PickCurrencyViewModel!
 
@@ -22,25 +30,20 @@ class PickCurrencyViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        viewModel.symbols.bind(listener: { [weak self] symbols in
-            print("Reload data!! \(symbols.count)")
-            DispatchQueue.main.async {
-                self?.tableView.reloadData()
-            }
-        })
+        bind(symbols: viewModel.symbols,
+             searchEnabled: viewModel.searchEnabled,
+             error: viewModel.error)
         
-        viewModel.searchEnabled.bind(listener: { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.searchBar.text = nil
-                self?.searchBar.resignFirstResponder()
-            }
-        })
-        
-        viewModel.onLoad()
+        viewModel.bind(onLoad: loadSubject.eraseToAnyPublisher(),
+                       onSelection: onSelectionSubject.eraseToAnyPublisher(),
+                       cancelSearch: cancelSubject.eraseToAnyPublisher(),
+                       search: searchSubject.eraseToAnyPublisher())
         
         self.tableView.dataSource = self
         self.tableView.delegate = self
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cellID")
+        
+        loadSubject.send(())
     }
 
 }
@@ -60,7 +63,7 @@ extension PickCurrencyViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         
-        let symbol = self.viewModel.symbols.value[indexPath.row]
+        let symbol = self.viewModel.symbolAt(at: indexPath.row)
         cell.textLabel?.text = symbol.description
         return cell
     }
@@ -68,19 +71,50 @@ extension PickCurrencyViewController: UITableViewDataSource {
 
 extension PickCurrencyViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print("didSelectRowAt : \(indexPath.row)")
-        self.viewModel.onSelection(row: indexPath.row)
+        self.onSelectionSubject.send(indexPath.row)
     }
 }
 
 extension PickCurrencyViewController: UISearchBarDelegate {
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        self.viewModel.onCancelSearch()
+        self.cancelSubject.send(())
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        self.viewModel.onSearch(text: searchText)
+        self.searchSubject.send(searchText)
     }
     
+}
+
+
+private extension PickCurrencyViewController {
+    func bind(symbols: AnyPublisher<[SymbolModel], Never>,
+              searchEnabled: AnyPublisher<Bool, Never>,
+              error: AnyPublisher<ErrorViewModel, Never>) {
+        
+        symbols
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] symbols in
+                self?.tableView.reloadData()
+            })
+            .store(in: &cancellables)
+        
+        searchEnabled
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] _ in
+                self?.searchBar.text = nil
+                self?.searchBar.resignFirstResponder()
+            })
+            .store(in: &cancellables)
+        
+        error
+            .compactMap{ $0 }
+            .receive(on: RunLoop.main)
+            .sink { (error) in
+                self.showErrorAlert(title: error.title, message: error.description)
+            }
+            .store(in: &cancellables)
+        
+    }
 }

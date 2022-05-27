@@ -21,7 +21,6 @@
 		419C783D27C3E98500F8A988 /* ExchangeRateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C783C27C3E98500F8A988 /* ExchangeRateService.swift */; };
 		419C784027C3FE5100F8A988 /* SymbolRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C783F27C3FE5100F8A988 /* SymbolRepository.swift */; };
 		419C784227C4082700F8A988 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C784127C4082700F8A988 /* HomeViewModel.swift */; };
-		419C784527C408FC00F8A988 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C784427C408FC00F8A988 /* Box.swift */; };
 		419C784827C41B2B00F8A988 /* symbols.json in Resources */ = {isa = PBXBuildFile; fileRef = 419C784727C41B2B00F8A988 /* symbols.json */; };
 		41DF874827D3B5320056A52E /* SymbolModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF874727D3B5320056A52E /* SymbolModel.swift */; };
 		41DF874C27D3BA260056A52E /* ExchangeRateGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF874B27D3BA260056A52E /* ExchangeRateGateway.swift */; };
@@ -73,7 +72,6 @@
 		419C783C27C3E98500F8A988 /* ExchangeRateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRateService.swift; sourceTree = "<group>"; };
 		419C783F27C3FE5100F8A988 /* SymbolRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolRepository.swift; sourceTree = "<group>"; };
 		419C784127C4082700F8A988 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
-		419C784427C408FC00F8A988 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		419C784727C41B2B00F8A988 /* symbols.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = symbols.json; sourceTree = "<group>"; };
 		41DF874727D3B5320056A52E /* SymbolModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolModel.swift; sourceTree = "<group>"; };
 		41DF874B27D3BA260056A52E /* ExchangeRateGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRateGateway.swift; sourceTree = "<group>"; };
@@ -199,7 +197,6 @@
 		419C784327C408E900F8A988 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				419C784427C408FC00F8A988 /* Box.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -430,7 +427,6 @@
 			files = (
 				41F9F31C27CFE2B300312361 /* AppCoordinator.swift in Sources */,
 				41F9F32527D11A2B00312361 /* SymbolUseCase.swift in Sources */,
-				419C784527C408FC00F8A988 /* Box.swift in Sources */,
 				41DF875227D3BFEA0056A52E /* ExchangeRateGateWayImpl.swift in Sources */,
 				41DF874C27D3BA260056A52E /* ExchangeRateGateway.swift in Sources */,
 				419C783D27C3E98500F8A988 /* ExchangeRateService.swift in Sources */,

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 enum SymbolUseCaseError: LocalizedError {
     case emptyStore
@@ -23,7 +24,7 @@ protocol SymbolUseCase {
     
     typealias CompletionType = (Result<[SymbolModel], Error>) -> ()
     
-    func getSymbols(completion: @escaping CompletionType)
+    func symbols() -> AnyPublisher<[SymbolModel], Error>
     func filterSymbols(text: String?) -> [SymbolModel]?
 }
 
@@ -37,37 +38,33 @@ class SymbolUseCaseImpl: SymbolUseCase {
         self.exchangeService = exchangeService
     }
     
-    func getSymbols(completion: @escaping CompletionType) {
-        guard let count = try? symbolRepository.count(),
-              count > 0 else {
-                  self.exchangeService.symbols(completion: { [weak self] result in
-                      guard let self = self else { return }
-                      switch result {
-                      case .success(let symbolArray):
-                          print("symbols: \(symbolArray.count)")
-                          self.symbolRepository.reset(items: symbolArray, completion: { [weak self] result in
-                              guard let self = self else { return }
-                              switch result {
-                              case .success:
-                                  print("reset OK")
-                                  completion(.success(self.symbolRepository.getAll() ?? []))
-                                  
-                              case .failure(let error):
-                                  print("reset FAIL")
-                                  completion(.failure(error))
-                              }
-                          })
-                      case .failure(let error):
-                          print("symbols FAIL \(error.localizedDescription)")
-                          completion(.failure(error))
-                      }
-                  })
-                  return
-              }
-        
-        print("count OK \(count)")
-        completion(.success(self.symbolRepository.getAll() ?? []))
-        
+    func symbols() -> AnyPublisher<[SymbolModel], Error> {
+        let result: Future<[SymbolModel], Error> = Future() { promise in
+            guard let count = try? self.symbolRepository.count(),
+                  count > 0 else {
+                self.exchangeService.symbols(completion: { [weak self] result in
+                    guard let self = self else { return }
+                    switch result {
+                    case .success(let symbolArray):
+                        self.symbolRepository.reset(items: symbolArray, completion: { [weak self] result in
+                            guard let self = self else { return }
+                            switch result {
+                            case .success:
+                                return promise(.success(self.symbolRepository.getAll() ?? []))
+                                
+                            case .failure(let error):
+                                return promise(.failure(error))
+                            }
+                        })
+                    case .failure(let error):
+                        return promise(.failure(error))
+                    }
+                })
+                return
+            }
+            return promise(.success(self.symbolRepository.getAll() ?? []))
+        }
+        return result.eraseToAnyPublisher()
     }
     
     func filterSymbols(text: String?) -> [SymbolModel]? {
@@ -77,8 +74,8 @@ class SymbolUseCaseImpl: SymbolUseCase {
         
         guard let count = try? symbolRepository.count(),
               count > 0 else {
-                  return nil
-              }
+            return nil
+        }
         
         return symbolRepository.filter(text: text)
     }

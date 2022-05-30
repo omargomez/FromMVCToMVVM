@@ -19,7 +19,6 @@ class PickCurrencyViewController: UIViewController {
     private var searchSubject = PassthroughSubject<String, Never>()
     private var cancellables: Set<AnyCancellable> = []
     
-    
     var viewModel: PickCurrencyViewModel!
 
     convenience init?(coder: NSCoder, viewModel: PickCurrencyViewModel) {
@@ -30,19 +29,18 @@ class PickCurrencyViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        bind(symbols: viewModel.symbols,
-             searchEnabled: viewModel.searchEnabled,
-             error: viewModel.error)
+        let output = viewModel.bind(input: PickCurrencyViewInput(
+            onLoad: loadSubject.eraseToAnyPublisher(),
+            onSelection: onSelectionSubject.eraseToAnyPublisher(),
+            cancelSearch: cancelSubject.eraseToAnyPublisher(),
+            search: searchSubject.eraseToAnyPublisher()))
         
-        viewModel.bind(onLoad: loadSubject.eraseToAnyPublisher(),
-                       onSelection: onSelectionSubject.eraseToAnyPublisher(),
-                       cancelSearch: cancelSubject.eraseToAnyPublisher(),
-                       search: searchSubject.eraseToAnyPublisher())
-        
+        bind(output: output)
+    
         self.tableView.dataSource = self
         self.tableView.delegate = self
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cellID")
-        
+
         loadSubject.send(())
     }
 
@@ -89,18 +87,15 @@ extension PickCurrencyViewController: UISearchBarDelegate {
 
 
 private extension PickCurrencyViewController {
-    func bind(symbols: AnyPublisher<[SymbolModel], Never>,
-              searchEnabled: AnyPublisher<Bool, Never>,
-              error: AnyPublisher<ErrorViewModel, Never>) {
-        
-        symbols
+    func bind(output: PickCurrencyViewOutput) {
+        output.symbols
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] symbols in
                 self?.tableView.reloadData()
             })
             .store(in: &cancellables)
         
-        searchEnabled
+        output.searchEnabled
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] _ in
                 self?.searchBar.text = nil
@@ -108,7 +103,7 @@ private extension PickCurrencyViewController {
             })
             .store(in: &cancellables)
         
-        error
+        output.error
             .compactMap{ $0 }
             .receive(on: RunLoop.main)
             .sink { (error) in

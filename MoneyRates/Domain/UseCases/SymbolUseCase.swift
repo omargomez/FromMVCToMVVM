@@ -68,7 +68,7 @@ class SymbolUseCaseImpl: SymbolUseCase {
     }
     
     func filterSymbols(text: String?) -> [SymbolModel]? {
-        guard let text = text else {
+        guard let text = text, !text.isEmpty else {
             return symbolRepository.getAll()
         }
         

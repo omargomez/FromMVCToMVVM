@@ -52,24 +52,18 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        bind(sourceTitle: viewModel.sourceTitle.eraseToAnyPublisher(),
-             targetTitle: viewModel.targetTitle.eraseToAnyPublisher(),
-             error: viewModel.error.eraseToAnyPublisher(),
-             targetResult: viewModel.targetResult.eraseToAnyPublisher(),
-             sourceResult: viewModel.sourceResult.eraseToAnyPublisher(),
-             busy: viewModel.busy.eraseToAnyPublisher()
-        )
+        let output = viewModel.bind(input: HomeViewInput(
+                        onLoad: loadSubject.eraseToAnyPublisher(),
+                        onInputSource: inputSourceSubject.eraseToAnyPublisher(),
+                        onInputTarget: inputTargetSubject.eraseToAnyPublisher(),
+                        pickSourceEvent: pickSourceSubject.eraseToAnyPublisher(),
+                        pickTargetEvent: pickTargetSubject.eraseToAnyPublisher(),
+                        onSource: onSourceSubject.eraseToAnyPublisher(),
+                        onTarget: onTargetSubject.eraseToAnyPublisher()))
         
-        viewModel.bind(onLoad: loadSubject.eraseToAnyPublisher(),
-                       onInputSource: inputSourceSubject.eraseToAnyPublisher(),
-                       onInputTarget: inputTargetSubject.eraseToAnyPublisher(),
-                       pickSourceEvent: pickSourceSubject.eraseToAnyPublisher(),
-                       pickTargetEvent: pickTargetSubject.eraseToAnyPublisher(),
-                       onSource: onSourceSubject.eraseToAnyPublisher(),
-                       onTarget: onTargetSubject.eraseToAnyPublisher())
+        bind(output: output)
         
         loadSubject.send(())
-        
     }
     
 
@@ -98,50 +92,42 @@ class HomeViewController: UIViewController {
     }
 }
 
-extension HomeViewController {
-    private func bind(sourceTitle: AnyPublisher<String?, Never>,
-        targetTitle: AnyPublisher<String?, Never>,
-        error: AnyPublisher<ErrorViewModel?, Never>,
-        targetResult: AnyPublisher<AmountViewModel?, Never>,
-        sourceResult: AnyPublisher<AmountViewModel?, Never>,
-        busy: AnyPublisher<Bool, Never>
-    ) {
-        
-        sourceTitle
+private extension HomeViewController {
+    func bind(output: HomeViewOutput) {
+        output.sourceTitle
             .receive(on: RunLoop.main)
             .sink { (title) in
                 self.sourceButton.setTitle(title, for: .normal)
             }.store(in: &cancellables)
         
-        targetTitle
+        output.targetTitle
             .receive(on: RunLoop.main)
             .sink { (title) in
                 self.targetButton.setTitle(title, for: .normal)
         }.store(in: &cancellables)
         
-        error
+        output.error
             .compactMap{ $0 }
             .receive(on: RunLoop.main)
             .sink { (error) in
                 self.showErrorAlert(title: error.title, message: error.description)
         }.store(in: &cancellables)
         
-        targetResult
+        output.targetResult
             .compactMap{ $0 }
             .receive(on: RunLoop.main)
             .sink { (value) in
                 self.targetField.text = String(describing: value)
         }.store(in: &cancellables)
         
-        sourceResult
+        output.sourceResult
             .compactMap{ $0 }
             .receive(on: RunLoop.main)
             .sink { (value) in
                 self.sourceField.text = String(describing: value)
         }.store(in: &cancellables)
-        
-        
-        busy
+                
+        output.busy
             .compactMap{ $0 }
             .receive(on: RunLoop.main)
             .sink { (value) in

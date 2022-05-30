@@ -30,6 +30,19 @@ enum PickCurrencyModeEnum {
     case target
 }
 
+struct PickCurrencyViewInput {
+    let onLoad: AnyPublisher<Void, Never>
+    let onSelection: AnyPublisher<Int, Never>
+    let cancelSearch: AnyPublisher<Void, Never>
+    let search: AnyPublisher<String, Never>
+}
+
+struct PickCurrencyViewOutput {
+    let symbols: AnyPublisher<[SymbolModel], Never>
+    let error: AnyPublisher<ErrorViewModel, Never>
+    let searchEnabled: AnyPublisher<Bool, Never>
+}
+
 protocol PickCurrencyViewModel {
     
     var mode: PickCurrencyModeEnum { get set }
@@ -38,16 +51,7 @@ protocol PickCurrencyViewModel {
     func currencyCount() -> Int
     func symbolAt(at: Int) -> SymbolModel
     
-    //Combine
-    var symbols: AnyPublisher<[SymbolModel], Never> { get }
-    var error: AnyPublisher<ErrorViewModel, Never> { get }
-    var searchEnabled: AnyPublisher<Bool, Never> { get }
-    
-    func bind(onLoad: AnyPublisher<Void, Never>,
-              onSelection: AnyPublisher<Int, Never>,
-              cancelSearch: AnyPublisher<Void, Never>,
-              search: AnyPublisher<String, Never>)
-    
+    func bind(input: PickCurrencyViewInput) -> PickCurrencyViewOutput
 }
 
 final class PickCurrencyViewModelImpl: PickCurrencyViewModel {
@@ -58,21 +62,9 @@ final class PickCurrencyViewModelImpl: PickCurrencyViewModel {
     let userCase: SymbolUseCase
     
     // Combine
-    @Published private(set) var _error: ErrorViewModel? = nil
-    @Published private(set) var _searchEnabled: Bool = false
-    @Published private(set) var _symbols: [SymbolModel] = []
-    
-    var error: AnyPublisher<ErrorViewModel, Never> {
-        $_error.compactMap({$0}).eraseToAnyPublisher()
-    }
-    
-    var searchEnabled: AnyPublisher<Bool, Never> {
-        $_searchEnabled.eraseToAnyPublisher()
-    }
-    
-    var symbols: AnyPublisher<[SymbolModel], Never> {
-        $_symbols.filter({!$0.isEmpty}).eraseToAnyPublisher()
-    }
+    @Published private(set) var error: ErrorViewModel? = nil
+    @Published private(set) var searchEnabled: Bool = false
+    @Published private(set) var symbols: [SymbolModel] = []
     
     private var cancellables: Set<AnyCancellable> = []
     
@@ -81,20 +73,16 @@ final class PickCurrencyViewModelImpl: PickCurrencyViewModel {
     }
     
     func currencyCount() -> Int {
-        return _symbols.count
+        return symbols.count
     }
 
     func symbolAt(at: Int) -> SymbolModel {
-        _symbols[at]
+        symbols[at]
     }
     
-    func bind(onLoad: AnyPublisher<Void, Never>,
-              onSelection: AnyPublisher<Int, Never>,
-              cancelSearch: AnyPublisher<Void, Never>,
-              search: AnyPublisher<String, Never>) {
-        
+    func bind(input: PickCurrencyViewInput) -> PickCurrencyViewOutput {
         typealias SymbolsType = Result<[SymbolModel], Error>
-        onLoad
+        input.onLoad
             .map({
                 self.userCase.symbols()
                     .map({$0.sorted(by:{$0.description < $1.description})})
@@ -109,32 +97,37 @@ final class PickCurrencyViewModelImpl: PickCurrencyViewModel {
             .sink(receiveValue: { value in
                 switch value {
                 case .success(let symbols):
-                    self._symbols = symbols
+                    self.symbols = symbols
                 case .failure(let error):
-                    self._error = ErrorViewModel(error: error)
+                    self.error = ErrorViewModel(error: error)
                 }
             })
             .store(in: &cancellables)
         
-        search
+        input.search
             .compactMap({self.userCase.filterSymbols(text: $0)})
             .compactMap({$0.sorted(by:{$0.description < $1.description})})
-            .assign(to: &$_symbols)
+            .assign(to: &$symbols)
             
-        cancelSearch
+        input.cancelSearch
             .compactMap({self.userCase.filterSymbols(text: nil)})
             .compactMap({$0.sorted(by:{$0.description < $1.description})})
             .sink(receiveValue: { value in
-                self._symbols = value
-                self._searchEnabled = false
+                self.symbols = value
+                self.searchEnabled = false
             })
             .store(in: &cancellables)
             
-        onSelection
+        input.onSelection
             .sink(receiveValue: { value in
-                let symbol = self._symbols[value]
+                let symbol = self.symbols[value]
                 self.delegate?.onSymbolSelected(viewModel: self, symbol: symbol)
             })
             .store(in: &cancellables)
+        
+        return PickCurrencyViewOutput(
+                symbols: $symbols.filter({!$0.isEmpty}).eraseToAnyPublisher(),
+                error: $error.compactMap({$0}).eraseToAnyPublisher(),
+                searchEnabled: $searchEnabled.eraseToAnyPublisher())
     }
 }

@@ -9,7 +9,6 @@ import Foundation
 import Combine
 
 struct AmountViewModel: CustomStringConvertible {
-    
     let value: Double
     
     var description: String {
@@ -17,26 +16,27 @@ struct AmountViewModel: CustomStringConvertible {
     }
 }
 
+struct HomeViewInput {
+    let onLoad: AnyPublisher<Void, Never>
+    let onInputSource: AnyPublisher<String, Never>
+    let onInputTarget: AnyPublisher<String, Never>
+    let pickSourceEvent: AnyPublisher<Void, Never>
+    let pickTargetEvent: AnyPublisher<Void, Never>
+    let onSource: AnyPublisher<SymbolModel, Never>
+    let onTarget: AnyPublisher<SymbolModel, Never>
+}
+
+struct HomeViewOutput {
+    let sourceTitle: AnyPublisher<String?, Never>
+    let targetTitle: AnyPublisher<String?, Never>
+    let error: AnyPublisher<ErrorViewModel?, Never>
+    let sourceResult: AnyPublisher<AmountViewModel?, Never>
+    let targetResult: AnyPublisher<AmountViewModel?, Never>
+    let busy: AnyPublisher<Bool, Never>
+}
+
 protocol HomeViewModel {
-    
-    // Inputs
-    func bind(onLoad: AnyPublisher<Void, Never>,
-              onInputSource: AnyPublisher<String, Never>,
-              onInputTarget: AnyPublisher<String, Never>,
-              pickSourceEvent: AnyPublisher<Void, Never>,
-              pickTargetEvent: AnyPublisher<Void, Never>,
-              onSource: AnyPublisher<SymbolModel, Never>,
-              onTarget: AnyPublisher<SymbolModel, Never>
-    )
-    
-    // Output
-    var sourceTitle: AnyPublisher<String?, Never> { get }
-    var targetTitle: AnyPublisher<String?, Never> { get }
-    var error: AnyPublisher<ErrorViewModel?, Never> { get }
-    var sourceResult: AnyPublisher<AmountViewModel?, Never> { get }
-    var targetResult: AnyPublisher<AmountViewModel?, Never> { get }
-    var busy: AnyPublisher<Bool, Never> { get }
-    
+    func bind(input: HomeViewInput) -> HomeViewOutput
 }
 
 enum HomeViewModelError: LocalizedError {
@@ -48,24 +48,13 @@ enum HomeViewModelError: LocalizedError {
 }
 
 class HomeViewModelImpl: ObservableObject, HomeViewModel {
-    var sourceTitle: AnyPublisher<String?, Never> { $_sourceTitle.eraseToAnyPublisher() }
-    var targetTitle: AnyPublisher<String?, Never> { $_targetTitle.eraseToAnyPublisher() }
-    var error: AnyPublisher<ErrorViewModel?, Never> { $_error.eraseToAnyPublisher() }
-    var sourceResult: AnyPublisher<AmountViewModel?, Never> { $_sourceResult.eraseToAnyPublisher() }
-    var targetResult: AnyPublisher<AmountViewModel?, Never> { $_targetResult.eraseToAnyPublisher() }
-    var busy: AnyPublisher<Bool, Never> { $_busy.eraseToAnyPublisher() }
-    
-    @Published private(set) var _sourceTitle: String? = nil
-    @Published private(set) var _targetTitle: String? = nil
-    @Published private(set) var _error: ErrorViewModel? = nil
-    @Published private(set) var _sourceResult: AmountViewModel? = nil
-    @Published private(set) var _targetResult: AmountViewModel? = nil
-    @Published private(set) var _busy: Bool = false
-    
-    private var sourceSymbol: String?
-    private var targetSymbol: String?
-    private var sourceAmount: Double?
-    private var targetAmount: Double?
+
+    @Published private(set) var sourceTitle: String? = nil
+    @Published private(set) var targetTitle: String? = nil
+    @Published private(set) var error: ErrorViewModel? = nil
+    @Published private(set) var sourceResult: AmountViewModel? = nil
+    @Published private(set) var targetResult: AmountViewModel? = nil
+    @Published private(set) var busy: Bool = false
     
     var coordinator: HomeCoordinator? = nil
     let conversionUC: ConversionUseCase
@@ -82,42 +71,35 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
         self.conversionUC = conversionUC
         self.resetDataUC = resetDataUC
     }
+
+    func bind(input: HomeViewInput) -> HomeViewOutput {
     
-    func bind(onLoad: AnyPublisher<Void, Never>,
-              onInputSource: AnyPublisher<String, Never>,
-              onInputTarget: AnyPublisher<String, Never>,
-              pickSourceEvent: AnyPublisher<Void, Never>,
-              pickTargetEvent: AnyPublisher<Void, Never>,
-              onSource: AnyPublisher<SymbolModel, Never>,
-              onTarget: AnyPublisher<SymbolModel, Never>
-    ) {
-        
-        pickSourceEvent
+        input.pickSourceEvent
             .sink(receiveValue: {
                 self.coordinator?.goToPickSource()
             }).store(in: &cancellables)
         
-        pickTargetEvent
+        input.pickTargetEvent
             .sink(receiveValue: {
                 self.coordinator?.goToPickTarget()
             })
             .store(in: &cancellables)
         
-        onSource
+        input.onSource
             .map({ symbol -> String in
                 return symbol.description
             })
-            .assign(to: &self.$_sourceTitle)
+            .assign(to: &self.$sourceTitle)
         
-        onTarget
+        input.onTarget
             .map({ symbol -> String in
                 return symbol.description
             })
-            .assign(to: &self.$_targetTitle)
+            .assign(to: &self.$targetTitle)
         
-        onLoad
+        input.onLoad
             .handleEvents(receiveOutput: { _ in
-                self._busy = true
+                self.busy = true
             })
             .map({
                 self.resetDataUC.execute()
@@ -127,35 +109,43 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
             })
             .switchToLatest()
             .sink(receiveValue: { _ in
-                self._busy = false
+                self.busy = false
             })
             .store(in: &cancellables)
         
-            setup(input: onInputSource,
-                sourceSymbol: onSource,
-                targetSymbol: onTarget)
+        setup(input: input.onInputSource,
+              sourceSymbol: input.onSource,
+              targetSymbol: input.onTarget)
             .sink(receiveValue: { result in
                 switch result {
                 case .success(let amount):
-                    self._targetResult = AmountViewModel(value: amount)
+                    self.targetResult = AmountViewModel(value: amount)
                 case .failure(let error):
-                    self._error = ErrorViewModel(error: error)
+                    self.error = ErrorViewModel(error: error)
                 }
             })
         
             .store(in: &cancellables)
-            setup(input: onInputTarget,
-                sourceSymbol: onTarget,
-                targetSymbol: onSource)
+        setup(input: input.onInputTarget,
+              sourceSymbol: input.onTarget,
+              targetSymbol: input.onSource)
             .sink(receiveValue: { result in
                 switch result {
                 case .success(let amount):
-                    self._sourceResult = AmountViewModel(value: amount)
+                    self.sourceResult = AmountViewModel(value: amount)
                 case .failure(let error):
-                    self._error = ErrorViewModel(error: error)
+                    self.error = ErrorViewModel(error: error)
                 }
             })
             .store(in: &cancellables)
+        
+        return HomeViewOutput(sourceTitle: $sourceTitle.eraseToAnyPublisher(),
+                                   targetTitle: $targetTitle.eraseToAnyPublisher(),
+                                   error: $error.eraseToAnyPublisher(),
+                                   sourceResult: $sourceResult.eraseToAnyPublisher(),
+                                   targetResult: $targetResult.eraseToAnyPublisher(),
+                                   busy: $busy.eraseToAnyPublisher())
+        
     }
 }
 
@@ -174,7 +164,7 @@ private extension HomeViewModelImpl {
             })
             .combineLatest(sourceSymbol, targetSymbol)
             .handleEvents(receiveOutput: { _ in
-                self._busy = true
+                self.busy = true
             })
             .map({ (amount, source, target) in
                 self.conversionUC.execute(sourceSymbol: source.id, targetSymbol: target.id, amount: amount)
@@ -187,7 +177,7 @@ private extension HomeViewModelImpl {
             })
             .switchToLatest()
             .handleEvents(receiveOutput: { _ in
-                self._busy = false
+                self.busy = false
             })
             .eraseToAnyPublisher()
     }

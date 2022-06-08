@@ -36,13 +36,6 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var busyIndicator: UIActivityIndicatorView!
     
     private var cancellables: Set<AnyCancellable> = []
-    private let loadSubject = PassthroughSubject<Void, Never>()
-    private let inputSourceSubject = PassthroughSubject<String, Never>()
-    private let inputTargetSubject = PassthroughSubject<String, Never>()
-    private let pickSourceSubject = PassthroughSubject<Void, Never>()
-    private let pickTargetSubject = PassthroughSubject<Void, Never>()
-    private let onSourceSubject = PassthroughSubject<SymbolModel, Never>()
-    private let onTargetSubject = PassthroughSubject<SymbolModel, Never>()
     
     convenience init?(coder: NSCoder, viewModel: HomeViewModel) {
         self.init(coder: coder)
@@ -52,27 +45,18 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let output = viewModel.bind(input: HomeViewInput(
-                        onLoad: loadSubject.eraseToAnyPublisher(),
-                        onInputSource: inputSourceSubject.eraseToAnyPublisher(),
-                        onInputTarget: inputTargetSubject.eraseToAnyPublisher(),
-                        pickSourceEvent: pickSourceSubject.eraseToAnyPublisher(),
-                        pickTargetEvent: pickTargetSubject.eraseToAnyPublisher(),
-                        onSource: onSourceSubject.eraseToAnyPublisher(),
-                        onTarget: onTargetSubject.eraseToAnyPublisher()))
+        bind(output: viewModel.output())
         
-        bind(output: output)
-        
-        loadSubject.send(())
+        viewModel.onLoad()
     }
     
 
     @IBAction func onSourcePickAction(_ sender: Any) {
-        pickSourceSubject.send(())
+        viewModel.pickSourceEvent()
     }
     
     @IBAction func onTargetPickAction(_ sender: Any) {
-        pickTargetSubject.send(())
+        viewModel.pickTargetEvent()
     }
     
     @IBAction func onSourceChanged(_ sender: UITextField) {
@@ -80,7 +64,7 @@ class HomeViewController: UIViewController {
             return
         }
         
-        inputSourceSubject.send(text)
+        viewModel.onInput(source: text)
     }
     
     @IBAction func onTargetChanged(_ sender: UITextField) {
@@ -88,7 +72,7 @@ class HomeViewController: UIViewController {
             return
         }
         
-        inputTargetSubject.send(text)
+        viewModel.onInput(target: text)
     }
 }
 
@@ -144,9 +128,9 @@ private extension HomeViewController {
 extension HomeViewController: PickCurrencyViewModelDelegate {
     func onSymbolSelected(viewModel: PickCurrencyViewModel, symbol: SymbolModel) {
         if viewModel.mode == .source {
-            onSourceSubject.send(symbol)
+            self.viewModel.onSelection(source: symbol)
         } else {
-            onTargetSubject.send(symbol)
+            self.viewModel.onSelection(target: symbol)
         }
     }
 }

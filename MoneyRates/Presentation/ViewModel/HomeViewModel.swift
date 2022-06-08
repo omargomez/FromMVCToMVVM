@@ -17,13 +17,13 @@ struct AmountViewModel: CustomStringConvertible {
 }
 
 struct HomeViewInput {
-    let onLoad: AnyPublisher<Void, Never>
-    let onInputSource: AnyPublisher<String, Never>
-    let onInputTarget: AnyPublisher<String, Never>
-    let pickSourceEvent: AnyPublisher<Void, Never>
-    let pickTargetEvent: AnyPublisher<Void, Never>
-    let onSource: AnyPublisher<SymbolModel, Never>
-    let onTarget: AnyPublisher<SymbolModel, Never>
+    let onLoad = PassthroughSubject<Void, Never>()
+    let onInputSource = PassthroughSubject<String, Never>()
+    let onInputTarget = PassthroughSubject<String, Never>()
+    let pickSourceEvent = PassthroughSubject<Void, Never>()
+    let pickTargetEvent = PassthroughSubject<Void, Never>()
+    let onSource = PassthroughSubject<SymbolModel, Never>()
+    let onTarget = PassthroughSubject<SymbolModel, Never>()
 }
 
 struct HomeViewOutput {
@@ -35,8 +35,26 @@ struct HomeViewOutput {
     let busy: AnyPublisher<Bool, Never>
 }
 
-protocol HomeViewModel {
-    func bind(input: HomeViewInput) -> HomeViewOutput
+protocol HomeViewModel: AnyObject {
+        
+    // Input methods
+    func onLoad()
+    func onInput(source: String)
+    func onInput(target: String)
+    func pickSourceEvent()
+    func pickTargetEvent()
+    func onSelection(source: SymbolModel)
+    func onSelection(target: SymbolModel)
+    
+    // Output properties
+    var sourceTitle: String? { get }
+    var targetTitle: String? { get }
+    var error: ErrorViewModel? { get }
+    var sourceResult: AmountViewModel? { get }
+    var targetResult: AmountViewModel? { get }
+    var busy: Bool { get }
+    
+    func output() -> HomeViewOutput
 }
 
 enum HomeViewModelError: LocalizedError {
@@ -47,20 +65,47 @@ enum HomeViewModelError: LocalizedError {
     }
 }
 
-class HomeViewModelImpl: ObservableObject, HomeViewModel {
-
-    @Published private(set) var sourceTitle: String? = nil
-    @Published private(set) var targetTitle: String? = nil
-    @Published private(set) var error: ErrorViewModel? = nil
-    @Published private(set) var sourceResult: AmountViewModel? = nil
-    @Published private(set) var targetResult: AmountViewModel? = nil
-    @Published private(set) var busy: Bool = false
+class HomeViewModelImpl: HomeViewModel {
+    func onLoad() {
+        input.onLoad.send( () )
+    }
+    
+    func onInput(source: String) {
+        input.onInputSource.send(source)
+    }
+    
+    func onInput(target: String) {
+        input.onInputTarget.send(target)
+    }
+    
+    func pickSourceEvent() {
+        input.pickSourceEvent.send(())
+    }
+    
+    func pickTargetEvent() {
+        input.pickTargetEvent.send(())
+    }
+    
+    func onSelection(source: SymbolModel) {
+        input.onSource.send(source)
+    }
+    
+    func onSelection(target: SymbolModel) {
+        input.onTarget.send(target)
+    }
+    
+    @Published var sourceTitle: String? = nil
+    @Published var targetTitle: String? = nil
+    @Published var error: ErrorViewModel? = nil
+    @Published var sourceResult: AmountViewModel? = nil
+    @Published var targetResult: AmountViewModel? = nil
+    @Published var busy: Bool = false
+    
+    private let input = HomeViewInput()
     
     var coordinator: HomeCoordinator? = nil
     let conversionUC: ConversionUseCase
     let resetDataUC: ResetDataUsecase
-    
-    var lastConvertItem: DispatchWorkItem? = nil
     
     private var cancellables: Set<AnyCancellable> = []
     typealias ConversionType = Result<Double, Error>
@@ -70,9 +115,11 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
          resetDataUC: ResetDataUsecase = ResetDataUseCaseImpl()) {
         self.conversionUC = conversionUC
         self.resetDataUC = resetDataUC
+        
+        setup()
     }
 
-    func bind(input: HomeViewInput) -> HomeViewOutput {
+    func setup() {
     
         input.pickSourceEvent
             .sink(receiveValue: {
@@ -139,20 +186,22 @@ class HomeViewModelImpl: ObservableObject, HomeViewModel {
             })
             .store(in: &cancellables)
         
+    }
+    
+    func output() -> HomeViewOutput {
         return HomeViewOutput(sourceTitle: $sourceTitle.eraseToAnyPublisher(),
                                    targetTitle: $targetTitle.eraseToAnyPublisher(),
                                    error: $error.eraseToAnyPublisher(),
                                    sourceResult: $sourceResult.eraseToAnyPublisher(),
                                    targetResult: $targetResult.eraseToAnyPublisher(),
                                    busy: $busy.eraseToAnyPublisher())
-        
     }
 }
 
 private extension HomeViewModelImpl {
-    func setup(input: AnyPublisher<String, Never>,
-               sourceSymbol: AnyPublisher<SymbolModel, Never>,
-               targetSymbol: AnyPublisher<SymbolModel, Never>
+    func setup(input: PassthroughSubject<String, Never>,
+               sourceSymbol: PassthroughSubject<SymbolModel, Never>,
+               targetSymbol: PassthroughSubject<SymbolModel, Never>
     ) -> AnyPublisher<ConversionType, Never> {
         input
             .compactMap({ text -> Double? in

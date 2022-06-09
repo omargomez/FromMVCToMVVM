@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07CE1B1428510036007B23F4 /* PickCurrencyUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07CE1B1328510036007B23F4 /* PickCurrencyUIView.swift */; };
 		419C780527C3DF4000F8A988 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C780427C3DF4000F8A988 /* AppDelegate.swift */; };
 		419C780727C3DF4000F8A988 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C780627C3DF4000F8A988 /* SceneDelegate.swift */; };
 		419C780927C3DF4000F8A988 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C780827C3DF4000F8A988 /* HomeViewController.swift */; };
@@ -54,6 +55,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		07CE1B1328510036007B23F4 /* PickCurrencyUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickCurrencyUIView.swift; sourceTree = "<group>"; };
 		419C780127C3DF4000F8A988 /* MoneyRates.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoneyRates.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		419C780427C3DF4000F8A988 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		419C780627C3DF4000F8A988 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -112,6 +114,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		07CE1B122850FFED007B23F4 /* UIViews */ = {
+			isa = PBXGroup;
+			children = (
+				07CE1B1328510036007B23F4 /* PickCurrencyUIView.swift */,
+			);
+			path = UIViews;
+			sourceTree = "<group>";
+		};
 		419C77F827C3DF3F00F8A988 = {
 			isa = PBXGroup;
 			children = (
@@ -287,6 +297,7 @@
 		41F9F32327D113C200312361 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				07CE1B122850FFED007B23F4 /* UIViews */,
 				419C780827C3DF4000F8A988 /* HomeViewController.swift */,
 				41F9F31F27D0FC8B00312361 /* PickCurrencyViewController.swift */,
 			);
@@ -433,6 +444,7 @@
 				419C780927C3DF4000F8A988 /* HomeViewController.swift in Sources */,
 				41DF875027D3BB700056A52E /* SymbolRepositoryGatewayImpl.swift in Sources */,
 				41F9F32227D10C1D00312361 /* PickCurrencyViewModel.swift in Sources */,
+				07CE1B1428510036007B23F4 /* PickCurrencyUIView.swift in Sources */,
 				41DF874827D3B5320056A52E /* SymbolModel.swift in Sources */,
 				41F9F32727D24A5500312361 /* ConversionUseCase.swift in Sources */,
 				41F9F32927D25EE800312361 /* ResetDataUseCase.swift in Sources */,

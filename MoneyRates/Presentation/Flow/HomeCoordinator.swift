@@ -22,8 +22,7 @@ final class HomeCoordinatorImpl: HomeCoordinator {
     }
     
     func goToPickSource() {
-        let controller  = getController()
-        controller.viewModel.mode = .source
+        let controller  = getUIController()
         parentController.present(controller, animated: true)
     }
     
@@ -44,6 +43,10 @@ extension HomeCoordinatorImpl {
             return result
         }) as! PickCurrencyViewController
         return controller
+    }
+    
+    private func getUIController() -> PickCurrencyUIViewController {
+        return PickCurrencyUIViewController()
     }
 }
 

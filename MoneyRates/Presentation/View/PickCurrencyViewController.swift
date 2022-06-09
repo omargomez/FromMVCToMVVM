@@ -7,6 +7,7 @@
 
 import UIKit
 import Combine
+import SwiftUI
 
 class PickCurrencyViewController: UIViewController {
 
@@ -111,5 +112,16 @@ private extension PickCurrencyViewController {
             }
             .store(in: &cancellables)
         
+    }
+}
+
+class PickCurrencyUIViewController: UIHostingController<PickCurrencyUIView> {
+
+    init(){
+        super.init(rootView: PickCurrencyUIView())
+    }
+    
+    @MainActor required dynamic init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

@@ -15,9 +15,9 @@ protocol HomeCoordinator {
 
 final class HomeCoordinatorImpl: HomeCoordinator {
     
-    private weak var parentController: HomeViewController!
+    private weak var parentController: HomeHostingController!
     
-    init(parentController: HomeViewController) {
+    init(parentController: HomeHostingController) {
         self.parentController = parentController
     }
     
@@ -46,7 +46,9 @@ extension HomeCoordinatorImpl {
     }
     
     private func getUIController() -> PickCurrencyUIViewController {
-        return PickCurrencyUIViewController()
+        let viewModel = PickCurrencyViewModelImpl()
+        viewModel.delegate = self
+        return PickCurrencyUIViewController(viewModel: viewModel)
     }
 }
 

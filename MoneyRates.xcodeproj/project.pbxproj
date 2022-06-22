@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		07CE1B1428510036007B23F4 /* PickCurrencyUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07CE1B1328510036007B23F4 /* PickCurrencyUIView.swift */; };
+		410A258228623E0B00F2CAD0 /* View+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410A258128623E0B00F2CAD0 /* View+Extensions.swift */; };
+		410A258428623EC500F2CAD0 /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410A258328623EC500F2CAD0 /* ActivityIndicatorView.swift */; };
 		419C780527C3DF4000F8A988 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C780427C3DF4000F8A988 /* AppDelegate.swift */; };
 		419C780727C3DF4000F8A988 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C780627C3DF4000F8A988 /* SceneDelegate.swift */; };
 		419C780927C3DF4000F8A988 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C780827C3DF4000F8A988 /* HomeViewController.swift */; };
@@ -23,6 +25,9 @@
 		419C784027C3FE5100F8A988 /* SymbolRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C783F27C3FE5100F8A988 /* SymbolRepository.swift */; };
 		419C784227C4082700F8A988 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C784127C4082700F8A988 /* HomeViewModel.swift */; };
 		419C784827C41B2B00F8A988 /* symbols.json in Resources */ = {isa = PBXBuildFile; fileRef = 419C784727C41B2B00F8A988 /* symbols.json */; };
+		41B3989728536CFE00E137B7 /* PickCurrencyUIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B3989628536CFE00E137B7 /* PickCurrencyUIViewController.swift */; };
+		41B398992853713E00E137B7 /* HomeHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B398982853713E00E137B7 /* HomeHostingController.swift */; };
+		41B3989D285371B800E137B7 /* HomeUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B3989C285371B800E137B7 /* HomeUIView.swift */; };
 		41DF874827D3B5320056A52E /* SymbolModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF874727D3B5320056A52E /* SymbolModel.swift */; };
 		41DF874C27D3BA260056A52E /* ExchangeRateGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF874B27D3BA260056A52E /* ExchangeRateGateway.swift */; };
 		41DF874E27D3BA950056A52E /* SymbolRepositoryGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF874D27D3BA950056A52E /* SymbolRepositoryGateway.swift */; };
@@ -56,6 +61,8 @@
 
 /* Begin PBXFileReference section */
 		07CE1B1328510036007B23F4 /* PickCurrencyUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickCurrencyUIView.swift; sourceTree = "<group>"; };
+		410A258128623E0B00F2CAD0 /* View+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "View+Extensions.swift"; path = "MoneyRates/Presentation/View/UIViews/View+Extensions.swift"; sourceTree = SOURCE_ROOT; };
+		410A258328623EC500F2CAD0 /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ActivityIndicatorView.swift; path = MoneyRates/Presentation/View/UIViews/ActivityIndicatorView.swift; sourceTree = SOURCE_ROOT; };
 		419C780127C3DF4000F8A988 /* MoneyRates.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoneyRates.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		419C780427C3DF4000F8A988 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		419C780627C3DF4000F8A988 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -75,6 +82,9 @@
 		419C783F27C3FE5100F8A988 /* SymbolRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolRepository.swift; sourceTree = "<group>"; };
 		419C784127C4082700F8A988 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		419C784727C41B2B00F8A988 /* symbols.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = symbols.json; sourceTree = "<group>"; };
+		41B3989628536CFE00E137B7 /* PickCurrencyUIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickCurrencyUIViewController.swift; sourceTree = "<group>"; };
+		41B398982853713E00E137B7 /* HomeHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHostingController.swift; sourceTree = "<group>"; };
+		41B3989C285371B800E137B7 /* HomeUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeUIView.swift; sourceTree = "<group>"; };
 		41DF874727D3B5320056A52E /* SymbolModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolModel.swift; sourceTree = "<group>"; };
 		41DF874B27D3BA260056A52E /* ExchangeRateGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRateGateway.swift; sourceTree = "<group>"; };
 		41DF874D27D3BA950056A52E /* SymbolRepositoryGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolRepositoryGateway.swift; sourceTree = "<group>"; };
@@ -118,6 +128,7 @@
 			isa = PBXGroup;
 			children = (
 				07CE1B1328510036007B23F4 /* PickCurrencyUIView.swift */,
+				41B3989C285371B800E137B7 /* HomeUIView.swift */,
 			);
 			path = UIViews;
 			sourceTree = "<group>";
@@ -207,6 +218,8 @@
 		419C784327C408E900F8A988 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				410A258128623E0B00F2CAD0 /* View+Extensions.swift */,
+				410A258328623EC500F2CAD0 /* ActivityIndicatorView.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -300,6 +313,8 @@
 				07CE1B122850FFED007B23F4 /* UIViews */,
 				419C780827C3DF4000F8A988 /* HomeViewController.swift */,
 				41F9F31F27D0FC8B00312361 /* PickCurrencyViewController.swift */,
+				41B3989628536CFE00E137B7 /* PickCurrencyUIViewController.swift */,
+				41B398982853713E00E137B7 /* HomeHostingController.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -441,12 +456,16 @@
 				41DF875227D3BFEA0056A52E /* ExchangeRateGateWayImpl.swift in Sources */,
 				41DF874C27D3BA260056A52E /* ExchangeRateGateway.swift in Sources */,
 				419C783D27C3E98500F8A988 /* ExchangeRateService.swift in Sources */,
+				41B3989D285371B800E137B7 /* HomeUIView.swift in Sources */,
 				419C780927C3DF4000F8A988 /* HomeViewController.swift in Sources */,
 				41DF875027D3BB700056A52E /* SymbolRepositoryGatewayImpl.swift in Sources */,
 				41F9F32227D10C1D00312361 /* PickCurrencyViewModel.swift in Sources */,
+				41B398992853713E00E137B7 /* HomeHostingController.swift in Sources */,
 				07CE1B1428510036007B23F4 /* PickCurrencyUIView.swift in Sources */,
+				410A258428623EC500F2CAD0 /* ActivityIndicatorView.swift in Sources */,
 				41DF874827D3B5320056A52E /* SymbolModel.swift in Sources */,
 				41F9F32727D24A5500312361 /* ConversionUseCase.swift in Sources */,
+				410A258228623E0B00F2CAD0 /* View+Extensions.swift in Sources */,
 				41F9F32927D25EE800312361 /* ResetDataUseCase.swift in Sources */,
 				41F9F31E27D0F39200312361 /* HomeCoordinator.swift in Sources */,
 				419C780527C3DF4000F8A988 /* AppDelegate.swift in Sources */,
@@ -454,6 +473,7 @@
 				419C784227C4082700F8A988 /* HomeViewModel.swift in Sources */,
 				419C780F27C3DF4000F8A988 /* MoneyRates.xcdatamodeld in Sources */,
 				419C783B27C3E6FD00F8A988 /* APISymbolsItem.swift in Sources */,
+				41B3989728536CFE00E137B7 /* PickCurrencyUIViewController.swift in Sources */,
 				41F9F32027D0FC8B00312361 /* PickCurrencyViewController.swift in Sources */,
 				419C784027C3FE5100F8A988 /* SymbolRepository.swift in Sources */,
 				419C780727C3DF4000F8A988 /* SceneDelegate.swift in Sources */,
@@ -648,7 +668,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.omar.MoneyRates;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.omar.MoneyRates.swiftui-mixed";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -676,7 +696,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.omar.MoneyRates;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.omar.MoneyRates.swiftui-mixed";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

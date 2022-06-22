@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-struct AmountViewModel: CustomStringConvertible {
+struct AmountViewModel: CustomStringConvertible, Equatable {
     let value: Double
     
     var description: String {
@@ -27,8 +27,8 @@ struct HomeViewInput {
 }
 
 struct HomeViewOutput {
-    let sourceTitle: AnyPublisher<String?, Never>
-    let targetTitle: AnyPublisher<String?, Never>
+    let sourceTitle: AnyPublisher<String, Never>
+    let targetTitle: AnyPublisher<String, Never>
     let error: AnyPublisher<ErrorViewModel?, Never>
     let sourceResult: AnyPublisher<AmountViewModel?, Never>
     let targetResult: AnyPublisher<AmountViewModel?, Never>
@@ -47,8 +47,8 @@ protocol HomeViewModel: AnyObject {
     func onSelection(target: SymbolModel)
     
     // Output properties
-    var sourceTitle: String? { get }
-    var targetTitle: String? { get }
+    var sourceTitle: String { get }
+    var targetTitle: String { get }
     var error: ErrorViewModel? { get }
     var sourceResult: AmountViewModel? { get }
     var targetResult: AmountViewModel? { get }
@@ -65,7 +65,7 @@ enum HomeViewModelError: LocalizedError {
     }
 }
 
-class HomeViewModelImpl: HomeViewModel {
+class HomeViewModelImpl: HomeViewModel, ObservableObject {
     func onLoad() {
         input.onLoad.send( () )
     }
@@ -94,8 +94,8 @@ class HomeViewModelImpl: HomeViewModel {
         input.onTarget.send(target)
     }
     
-    @Published var sourceTitle: String? = nil
-    @Published var targetTitle: String? = nil
+    @Published var sourceTitle: String = "Pick Source Currency"
+    @Published var targetTitle: String = "Pick Target Currency"
     @Published var error: ErrorViewModel? = nil
     @Published var sourceResult: AmountViewModel? = nil
     @Published var targetResult: AmountViewModel? = nil
@@ -155,6 +155,7 @@ class HomeViewModelImpl: HomeViewModel {
                     }
             })
             .switchToLatest()
+            .receive(on: RunLoop.main)
             .sink(receiveValue: { _ in
                 self.busy = false
             })
@@ -225,6 +226,7 @@ private extension HomeViewModelImpl {
                 })
             })
             .switchToLatest()
+            . receive(on: RunLoop.main)
             .handleEvents(receiveOutput: { _ in
                 self.busy = false
             })

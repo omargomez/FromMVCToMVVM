@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-struct ErrorViewModel {
+struct ErrorViewModel: Equatable {
     let title: String
     let description: String
 }

@@ -27,18 +27,7 @@ final class AppCoordinatorImpl: AppCoordinator {
             return
         }
         
-        let controller = UIStoryboard.main.instantiateViewController(identifier: "homeController", creator: { coder in
-            
-            let viewModel = HomeViewModelImpl()
-            guard let result = HomeViewController(coder: coder, viewModel: viewModel) else {
-                fatalError("HomeViewController failed")
-            }
-            viewModel.coordinator = HomeCoordinatorImpl(parentController: result)
-            return result
-            
-        })
-        
-        navigationController.setViewControllers([controller], animated: false)
+        navigationController.setViewControllers([getUIController()], animated: false)
         
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
@@ -46,3 +35,26 @@ final class AppCoordinatorImpl: AppCoordinator {
     }
     
 }
+
+private extension AppCoordinatorImpl {
+    func getController() -> UIViewController {
+       UIStoryboard.main.instantiateViewController(identifier: "homeController", creator: { coder in
+            
+            let viewModel = HomeViewModelImpl()
+            guard let result = HomeViewController(coder: coder, viewModel: viewModel) else {
+                fatalError("HomeViewController failed")
+            }
+//            viewModel.coordinator = HomeCoordinatorImpl(parentController: result)
+            return result
+            
+        })
+    }
+    
+    func getUIController() -> UIViewController {
+        let viewModel = HomeViewModelImpl()
+        let result = HomeHostingController(viewModel: viewModel)
+        viewModel.coordinator = HomeCoordinatorImpl(parentController: result)
+        return result
+    }
+}
+

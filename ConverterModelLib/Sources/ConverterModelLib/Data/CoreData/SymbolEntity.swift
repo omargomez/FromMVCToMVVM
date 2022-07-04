@@ -8,8 +8,10 @@
 import Foundation
 import CoreData
 
-final class SymbolEntity: NSManagedObject {
+@objc(SymbolEntity)
+
+final public class SymbolEntity: NSManagedObject {
     
     @NSManaged var code: String?
-    @NSManaged var symbolDescription: String?    
+    @NSManaged var symbolDescription: String?
 }

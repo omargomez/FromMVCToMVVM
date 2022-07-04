@@ -11,7 +11,12 @@ import CoreData
 extension NSPersistentContainer {
     
     static let moneyRates: NSPersistentContainer = {
-        let result = NSPersistentContainer(name: "MoneyRates")
+        guard
+            let objectModelURL = Bundle.module.url(forResource: "MoneyRates", withExtension: "momd"),
+            let objectModel = NSManagedObjectModel(contentsOf: objectModelURL) else {
+            fatalError("Cant't find model")
+        }
+        let result = NSPersistentContainer(name: "MoneyRates", managedObjectModel: objectModel)
         let semaphore = DispatchSemaphore(value: 0)
         
         result.loadPersistentStores(completionHandler: { desc, error in

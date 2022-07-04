@@ -12,7 +12,6 @@
 		419C780727C3DF4000F8A988 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C780627C3DF4000F8A988 /* SceneDelegate.swift */; };
 		419C780927C3DF4000F8A988 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C780827C3DF4000F8A988 /* HomeViewController.swift */; };
 		419C780C27C3DF4000F8A988 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 419C780A27C3DF4000F8A988 /* Main.storyboard */; };
-		419C780F27C3DF4000F8A988 /* MoneyRates.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 419C780D27C3DF4000F8A988 /* MoneyRates.xcdatamodeld */; };
 		419C781127C3DF4200F8A988 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 419C781027C3DF4200F8A988 /* Assets.xcassets */; };
 		419C781427C3DF4200F8A988 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 419C781227C3DF4200F8A988 /* LaunchScreen.storyboard */; };
 		419C781F27C3DF4300F8A988 /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419C781E27C3DF4300F8A988 /* HomeViewModelTests.swift */; };
@@ -48,7 +47,6 @@
 		419C780627C3DF4000F8A988 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		419C780827C3DF4000F8A988 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		419C780B27C3DF4000F8A988 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		419C780E27C3DF4000F8A988 /* MoneyRates.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MoneyRates.xcdatamodel; sourceTree = "<group>"; };
 		419C781027C3DF4200F8A988 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		419C781327C3DF4200F8A988 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		419C781527C3DF4200F8A988 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -136,7 +134,6 @@
 				419C781027C3DF4200F8A988 /* Assets.xcassets */,
 				419C781227C3DF4200F8A988 /* LaunchScreen.storyboard */,
 				419C781527C3DF4200F8A988 /* Info.plist */,
-				419C780D27C3DF4000F8A988 /* MoneyRates.xcdatamodeld */,
 			);
 			path = MoneyRates;
 			sourceTree = "<group>";
@@ -333,7 +330,6 @@
 				419C780927C3DF4000F8A988 /* HomeViewController.swift in Sources */,
 				41F9F31E27D0F39200312361 /* HomeCoordinatorImpl.swift in Sources */,
 				419C780527C3DF4000F8A988 /* AppDelegate.swift in Sources */,
-				419C780F27C3DF4000F8A988 /* MoneyRates.xcdatamodeld in Sources */,
 				41F9F32027D0FC8B00312361 /* PickCurrencyViewController.swift in Sources */,
 				419C780727C3DF4000F8A988 /* SceneDelegate.swift in Sources */,
 			);
@@ -706,19 +702,6 @@
 			productName = ConverterModelLib;
 		};
 /* End XCSwiftPackageProductDependency section */
-
-/* Begin XCVersionGroup section */
-		419C780D27C3DF4000F8A988 /* MoneyRates.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				419C780E27C3DF4000F8A988 /* MoneyRates.xcdatamodel */,
-			);
-			currentVersion = 419C780E27C3DF4000F8A988 /* MoneyRates.xcdatamodel */;
-			path = MoneyRates.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 419C77F927C3DF3F00F8A988 /* Project object */;
 }

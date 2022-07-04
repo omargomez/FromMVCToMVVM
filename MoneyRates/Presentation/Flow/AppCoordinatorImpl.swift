@@ -7,11 +7,7 @@
 
 import Foundation
 import UIKit
-
-
-protocol AppCoordinator {
-    func goToHome()
-}
+import ConverterModelLib
 
 final class AppCoordinatorImpl: AppCoordinator {
     

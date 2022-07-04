@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SymbolModel: Identifiable {
-    let id: String
-    let description: String
+public struct SymbolModel: Identifiable {
+    public let id: String
+    public let description: String
 }

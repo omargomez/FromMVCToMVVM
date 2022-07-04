@@ -28,23 +28,23 @@
 
 import Foundation
 
-final class Box<T> {
-  //1
-  typealias Listener = (T) -> Void
-  var listener: Listener?
-  //2
-  var value: T {
-    didSet {
-      listener?(value)
+public final class Box<T> {
+    //1
+    public typealias Listener = (T) -> Void
+    public var listener: Listener?
+    //2
+    public var value: T {
+        didSet {
+            listener?(value)
+        }
     }
-  }
-  //3
-  init(_ value: T) {
-    self.value = value
-  }
-  //4
-  func bind(listener: Listener?) {
-    self.listener = listener
-    listener?(value)
-  }
+    //3
+    public init(_ value: T) {
+        self.value = value
+    }
+    //4
+    public func bind(listener: Listener?) {
+        self.listener = listener
+        listener?(value)
+    }
 }

@@ -7,11 +7,7 @@
 
 import Foundation
 import UIKit
-
-protocol HomeCoordinator {
-    func goToPickSource()
-    func goToPickTarget()
-}
+import ConverterModelLib
 
 final class HomeCoordinatorImpl: HomeCoordinator {
     

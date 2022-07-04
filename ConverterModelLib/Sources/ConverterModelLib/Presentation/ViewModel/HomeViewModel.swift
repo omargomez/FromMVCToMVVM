@@ -7,16 +7,16 @@
 
 import Foundation
 
-struct AmountViewModel: CustomStringConvertible {
+public struct AmountViewModel: CustomStringConvertible {
     
-    let value: Double
+    public let value: Double
     
-    var description: String {
+    public var description: String {
         String(format: "%.2f", value)
     }
 }
 
-protocol HomeViewModel {
+public protocol HomeViewModel {
     
     var symbols: Box<[SymbolModel]> { get }
     var sourceTitle: Box<String?> { get }
@@ -35,26 +35,31 @@ protocol HomeViewModel {
 }
 
 
-class HomeViewModelImpl: HomeViewModel {
+public class HomeViewModelImpl: HomeViewModel {
     
-    let symbols = Box<[SymbolModel]>([])
-    let error = Box<ErrorViewModel?>(nil)
-    let sourceTitle = Box<String?>(nil)
-    let targetTitle = Box<String?>(nil)
-    var targetResult: Box<AmountViewModel?> = Box(nil)
-    var sourceResult: Box<AmountViewModel?> = Box(nil)
-    var busy: Box<Bool> = Box(true)
+    public let symbols = Box<[SymbolModel]>([])
+    public let error = Box<ErrorViewModel?>(nil)
+    public let sourceTitle = Box<String?>(nil)
+    public let targetTitle = Box<String?>(nil)
+    public var targetResult: Box<AmountViewModel?> = Box(nil)
+    public var sourceResult: Box<AmountViewModel?> = Box(nil)
+    public var busy: Box<Bool> = Box(true)
     
     private var sourceSymbol: String?
     private var targetSymbol: String?
     private var sourceAmount: Double?
     private var targetAmount: Double?
     
-    var coordinator: HomeCoordinator? = nil
+    public var coordinator: HomeCoordinator? = nil
     let conversionUC: ConversionUseCase
     let resetDataUC: ResetDataUsecase
     
     var lastConvertItem: DispatchWorkItem? = nil
+    
+    public init() {
+        self.conversionUC = ConversionUseCaseImpl()
+        self.resetDataUC = ResetDataUseCaseImpl()
+    }
     
     init(symbolRepository: SymbolRepository = SymbolRepositoryImpl(), exchangeService: ExchangeRateService = ExchangeRateServiceImpl(),
          conversionUC: ConversionUseCase = ConversionUseCaseImpl(),
@@ -63,7 +68,7 @@ class HomeViewModelImpl: HomeViewModel {
         self.resetDataUC = resetDataUC
     }
     
-    func onLoadView() {
+    public func onLoadView() {
         print("Loading")
         self.busy.value = true
         self.resetDataUC.execute(completion: { result in
@@ -77,35 +82,35 @@ class HomeViewModelImpl: HomeViewModel {
         })
     }
     
-    func onSource(symbol: SymbolModel) {
+    public func onSource(symbol: SymbolModel) {
         sourceSymbol = symbol.id
         sourceTitle.value = symbol.description
         tryConversion()
     }
     
-    func onTarget(symbol: SymbolModel) {
+    public func onTarget(symbol: SymbolModel) {
         targetSymbol = symbol.id
         targetTitle.value = symbol.description
         tryConversion()
     }
     
-    func sourceChanged(input: String) {
+    public func sourceChanged(input: String) {
         sourceAmount = (input as NSString).doubleValue
         
         tryConversion()
     }
     
-    func targetChanged(input: String) {
+    public func targetChanged(input: String) {
         sourceAmount = (input as NSString).doubleValue
         
         tryConversion(inverted: true)
     }
     
-    func pickSource() {
+    public func pickSource() {
         coordinator?.goToPickSource()
     }
     
-    func pickTarget() {
+    public func pickTarget() {
         coordinator?.goToPickTarget()
     }
     
